@@ -82,6 +82,35 @@ Severity is normalized into a `level` label (RFC5424's `informational`/`notice`/
 Retention is 30 days by default, but `debug`/`info`-level lines expire after 24h. See `retention_stream` in `te-syslog-loki/loki-config.yaml` to adjust.
 
 Two more dashboards are statically provisioned alongside it. "Tessera Overview" shows one repeated row per configured processor; clicking any stat in a row opens "Tessera Processor Detail" scoped to that processor. Both key on the `processor` label built by the relabel rules above rather than on serial number, because serial comes from `tessera_info` and a processor stops publishing that the moment it goes offline — so an unreachable processor keeps its row and shows as OFFLINE instead of silently disappearing.
+### Verbatim archive
+
+The stream the dashboard reads is deliberately lossy: routine noise is dropped by the `stage.drop` blocks in `te-syslog-alloy/config.alloy`, and syslog's severity names are remapped into Grafana's vocabulary so the Logs panel colours correctly. That is the right trade for day-to-day monitoring and the wrong one for a fault report.
+
+So the listener also fans out to a second, unedited branch under `job="tessera_syslog_raw"`. Nothing is dropped, and severity is kept as the original RFC5424 name (`informational`, `notice`, `warning`, ...) in a `syslog_severity` label rather than being collapsed into `level`. The message hostname, app name, and process ID are attached as structured metadata, which Loki does not index as streams — so `proc_id` changing on every processor restart costs nothing.
+
+**Tessera sends a minimal syslog frame.** In testing against 3.5.2 the processors emit only a priority, a tag and a message — no timestamp, no hostname and no process ID. Entry timestamps are therefore Alloy's receipt time, and there is no processor-side clock recorded anywhere in the pipeline. Do not set `use_incoming_timestamp` on the listener to try to recover one: with no timestamp to parse, Alloy produces the zero time and Loki rejects the entire batch with `before 0001-01-01`, which silently stops **both** streams.
+
+Both branches share one listener and one Loki writer; the dashboard selects `job="tessera_syslog"` and is unaffected.
+
+Because it keeps everything, this stream is the larger of the two. It defaults to 7 days (vs 30 for the dashboard stream) via `retention_stream` in `te-syslog-loki/loki-config.yaml`.
+
+To pull it out for the manufacturer as standard RFC3164 wire frames — the format any syslog server can re-ingest:
+
+```bash
+./export-raw-syslog.sh 192.0.2.50            # last 24h, one processor
+./export-raw-syslog.sh 192.0.2.50 72         # last 72h
+./export-raw-syslog.sh all 6 > incident.log  # every processor, last 6h
+```
+
+```
+<132>Sep  1 14:36:34 192.0.2.50 tessera: Panel 3 reporting cable loop fault
+<11>Sep  1 14:36:34 192.0.2.50 kernel: Genlock reference lost
+```
+
+`PRI` is reconstructed as `facility * 8 + severity` from the stored names. Since the processors send no hostname, the `HOSTNAME` field is filled with the source IP — valid RFC3164, and more use to whoever opens the file.
+
+Set `LOKI_URL` if Loki isn't on `http://localhost:3101`. A single query is capped at 5000 entries; the script warns on stderr if you hit it, in which case narrow the window or use [logcli](https://grafana.com/docs/loki/latest/query/logcli/).
+
 
 A "Tessera Syslog" dashboard is statically provisioned in Grafana with dropdown filters for serial number, processor name, type, version, and project name. These are the same identity fields `tessera_info` exposes for Prometheus, with an added severity filter derived from the syslog input itself.
 
@@ -105,6 +134,15 @@ sudo brew services start grafana-alloy
 
 # To bring down the service:
 sudo brew services stop grafana-alloy
+
+# To RESTART after editing the config, go through launchd directly:
+sudo launchctl kickstart -k system/homebrew.mxcl.grafana-alloy
+```
+
+`brew services restart` is unreliable here. Started with `sudo`, Alloy is a root-owned system daemon in `/Library/LaunchDaemons`, so `brew services` run as your own user reports `Running: false` and may not restart anything. Confirm a restart actually happened by checking that the PID changed:
+
+```bash
+pgrep -f '/opt/homebrew/opt/grafana-alloy/bin/alloy'
 ```
 
 `te-syslog-alloy/config-native.alloy` is the same pipeline as `te-syslog-alloy/config.alloy`, just listening on `:514` directly and pushing to Loki's published port (`127.0.0.1:3101`) instead of compose DNS.
