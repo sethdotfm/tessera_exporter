@@ -1,0 +1,850 @@
+{
+  "uid": "tessera-detail",
+  "title": "Tessera Processor Detail",
+  "description": "Single-processor detail, scoped by the 'processor' target label that the overview passes in as ?var-processor=. Scaffold only — the variables, filters, drill-down wiring and one worked example of each query idiom are in place; the real panel layout is yours to build. Idioms shown: plain metric ($processor scoping), __name__ regex for sensor families whose names encode the sensor, info-metric to table, panel repeat over a label (groups), variable interpolated into a metric name (input ports), and Loki scoped to the same processor.",
+  "tags": [
+    "tessera",
+    "detail"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "links": [
+    {
+      "title": "Back to Tessera Overview",
+      "type": "link",
+      "url": "/d/tessera-overview/tessera-overview?${__url_time_range}",
+      "icon": "arrow-left",
+      "targetBlank": false,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true,
+      "tags": []
+    },
+    {
+      "title": "Tessera Syslog",
+      "type": "link",
+      "url": "/d/tessera-syslog/tessera-syslog?${__url_time_range}",
+      "icon": "external link",
+      "targetBlank": false,
+      "asDropdown": false,
+      "includeVars": false,
+      "keepTime": true,
+      "tags": []
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "processor",
+        "label": "Processor",
+        "description": "Set from the URL when you arrive from the overview. Single-select: this dashboard is scoped to exactly one processor.",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(tessera_up, processor)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      },
+      {
+        "name": "instance",
+        "label": "Instance",
+        "description": "Derived from $processor. Hidden. Used to match the syslog source address, which Alloy stores as connection_ip_address.",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(tessera_up{processor=\"$processor\"}, instance)",
+        "refresh": 1,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      },
+      {
+        "name": "serial",
+        "label": "Serial",
+        "description": "Derived from $processor. Hidden, and empty while the processor is unreachable, since it comes from tessera_info. Use it for display, never for scoping.",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(tessera_info{processor=\"$processor\"}, serial)",
+        "refresh": 1,
+        "hide": 2,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      },
+      {
+        "name": "group",
+        "label": "Group",
+        "description": "Group numbers configured on this processor. Drives the panel repeat in the Groups row.",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(tessera_groups_items_brightness{processor=\"$processor\"}, number)",
+        "refresh": 1,
+        "sort": 3,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "port",
+        "label": "Input port",
+        "description": "The exporter encodes the port in the metric name (tessera_input_ports_<port>_...), not in a label, so this is a custom list rather than a query.",
+        "type": "custom",
+        "query": "dvi,hdmi,sdi",
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "severity",
+        "label": "Severity",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
+        "query": {
+          "label": "level",
+          "stream": "{job=\"tessera_syslog\"}",
+          "type": "label_values",
+          "refId": "LokiVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "search",
+        "label": "Log search",
+        "description": "Case-insensitive regex applied to the syslog line. Empty matches everything.",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Status",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "tessera_up{processor=\"$processor\"}",
+          "instant": true,
+          "legendFormat": "status"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "colorMode": "background_solid",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OFFLINE",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "ONLINE",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "noValue": "NO DATA"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Hottest sensor",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 3,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"$processor\"})",
+          "instant": true,
+          "legendFormat": "max temp"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Panels online",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 6,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "tessera_devices_statistics_online_count{processor=\"$processor\"}",
+          "instant": true,
+          "legendFormat": "online"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "tessera_devices_statistics_associated_count{processor=\"$processor\"}",
+          "instant": true,
+          "legendFormat": "associated"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name",
+        "colorMode": "none",
+        "graphMode": "none",
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Panel errors",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 9,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "tessera_devices_statistics_error_count{processor=\"$processor\"}",
+          "instant": true,
+          "legendFormat": "errors"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "colorMode": "background_solid",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Identity",
+      "description": "Info-metric idiom: tessera_info carries its payload in labels, so query it instant + format:table and drop Time/Value.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "tessera_info{processor=\"$processor\"}",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "job": true
+            },
+            "indexByName": {
+              "serial": 0,
+              "processor_name": 1,
+              "processor_type": 2,
+              "software_version": 3,
+              "project": 4,
+              "instance": 5,
+              "site": 6,
+              "location": 7,
+              "processor": 8
+            },
+            "renameByName": {
+              "serial": "Serial",
+              "processor_name": "Name",
+              "processor_type": "Type",
+              "software_version": "Version",
+              "project": "Project",
+              "instance": "IP",
+              "site": "Site",
+              "location": "Location",
+              "processor": "Processor"
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Temperatures",
+      "description": "__name__ regex idiom: each sensor is its own metric, so match the family and label_replace the sensor name back out for the legend.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"$processor\"}, \"sensor\", \"$1\", \"__name__\", \"tessera_system_temperature_(.+)_celsius\")",
+          "legendFormat": "{{sensor}}"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Fan speeds",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "label_replace({__name__=~\"tessera_system_fan_.+_speed_rpm\", processor=\"$processor\"}, \"fan\", \"$1\", \"__name__\", \"tessera_system_fan_(.+)_speed_rpm\")",
+          "legendFormat": "{{fan}}"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rotrpm",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 200,
+      "type": "row",
+      "title": "Groups",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "panels": [
+        {
+          "id": 201,
+          "type": "stat",
+          "title": "Group $group",
+          "description": "Panel-repeat idiom: groups are distinguished by the 'number' label, so repeat a panel over $group rather than piling every group into one legend.",
+          "repeat": "group",
+          "repeatDirection": "h",
+          "maxPerRow": 6,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 14
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "tessera_groups_items_brightness{processor=\"$processor\", number=\"$group\"}",
+              "instant": true,
+              "legendFormat": "brightness"
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "tessera_groups_items_gamma{processor=\"$processor\", number=\"$group\"}",
+              "instant": true,
+              "legendFormat": "gamma"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name",
+            "colorMode": "none",
+            "graphMode": "none",
+            "orientation": "horizontal"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2
+            },
+            "overrides": []
+          }
+        }
+      ]
+    },
+    {
+      "id": 300,
+      "type": "row",
+      "title": "Input ports",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "panels": [
+        {
+          "id": 301,
+          "type": "timeseries",
+          "title": "$port signal",
+          "description": "Variable-in-metric-name idiom: the port is part of the metric name, so $port is interpolated into the name itself. Gaps are the exporter's sentinel handling — no signal reports -1, which becomes NaN rather than a misleading 0.",
+          "repeat": "port",
+          "repeatDirection": "h",
+          "maxPerRow": 3,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 15
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "tessera_input_ports_${port}_meta_data_refresh_rate_hertz{processor=\"$processor\"}",
+              "legendFormat": "refresh rate"
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "tessera_input_ports_${port}_meta_data_resolution_width{processor=\"$processor\"}",
+              "legendFormat": "width"
+            },
+            {
+              "refId": "C",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "tessera_input_ports_${port}_meta_data_resolution_height{processor=\"$processor\"}",
+              "legendFormat": "height"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 0,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "refresh rate"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "hertz"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 400,
+      "type": "row",
+      "title": "Syslog",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "panels": [
+        {
+          "id": 401,
+          "type": "logs",
+          "title": "Syslog — $processor",
+          "description": "Scoped by source IP, since syslog carries no serial. $instance is derived from $processor, so this follows the drill-down automatically. Requires the optional Loki/Alloy stack; without it the panel is simply empty.",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 16
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "{job=\"tessera_syslog\", connection_ip_address=~\"^(${instance:pipe})$\", level=~\"${severity:pipe}\"} |~ \"(?i)${search:raw}\""
+            }
+          ],
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "prettifyLogMessage": false,
+            "enableLogDetails": true,
+            "dedupStrategy": "none",
+            "sortOrder": "Descending"
+          }
+        }
+      ]
+    }
+  ]
+}
