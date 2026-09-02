@@ -1,7 +1,7 @@
 {
   "uid": "tessera-detail",
   "title": "Tessera Processor Detail",
-  "description": "Single-processor detail, scoped by the 'processor' target label that the overview passes in as ?var-processor=. Scaffold only — the variables, filters, drill-down wiring and one worked example of each query idiom are in place; the real panel layout is yours to build. Idioms shown: plain metric ($processor scoping), __name__ regex for sensor families whose names encode the sensor, info-metric to table, panel repeat over a label (groups), variable interpolated into a metric name (input ports), and Loki scoped to the same processor.",
+  "description": "Single-processor detail, scoped by the 'processor' target label that the overview passes in as ?var-processor=. Scaffold only \u2014 the variables, filters, drill-down wiring and one worked example of each query idiom are in place; the real panel layout is yours to build. Idioms shown: plain metric ($processor scoping), __name__ regex for sensor families whose names encode the sensor, info-metric to table, panel repeat over a label (groups), variable interpolated into a metric name (input ports), and Loki scoped to the same processor.",
   "tags": [
     "tessera",
     "detail"
@@ -51,12 +51,13 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "query": "label_values(tessera_up, processor)",
+        "query": "query_result(tessera_up)",
         "refresh": 1,
         "sort": 1,
         "multi": false,
         "includeAll": false,
-        "current": {}
+        "current": {},
+        "regex": "/processor=\"([^\"]+)\"/"
       },
       {
         "name": "instance",
@@ -67,12 +68,13 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "query": "label_values(tessera_up{processor=\"$processor\"}, instance)",
+        "query": "query_result(tessera_up{processor=\"${processor:raw}\"})",
         "refresh": 1,
         "hide": 2,
         "multi": false,
         "includeAll": false,
-        "current": {}
+        "current": {},
+        "regex": "/instance=\"([^\"]+)\"/"
       },
       {
         "name": "serial",
@@ -83,7 +85,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "query": "label_values(tessera_info{processor=\"$processor\"}, serial)",
+        "query": "label_values(tessera_info{processor=\"${processor:raw}\"}, serial)",
         "refresh": 1,
         "hide": 2,
         "multi": false,
@@ -99,7 +101,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "query": "label_values(tessera_groups_items_brightness{processor=\"$processor\"}, number)",
+        "query": "label_values(tessera_groups_items_brightness{processor=\"${processor:raw}\"}, number)",
         "refresh": 1,
         "sort": 3,
         "multi": true,
@@ -196,7 +198,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "tessera_up{processor=\"$processor\"}",
+          "expr": "tessera_up{processor=\"${processor:raw}\"}",
           "instant": true,
           "legendFormat": "status"
         }
@@ -274,7 +276,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"$processor\"})",
+          "expr": "max({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"${processor:raw}\"})",
           "instant": true,
           "legendFormat": "max temp"
         }
@@ -340,7 +342,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "tessera_devices_statistics_online_count{processor=\"$processor\"}",
+          "expr": "tessera_devices_statistics_online_count{processor=\"${processor:raw}\"}",
           "instant": true,
           "legendFormat": "online"
         },
@@ -350,7 +352,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "tessera_devices_statistics_associated_count{processor=\"$processor\"}",
+          "expr": "tessera_devices_statistics_associated_count{processor=\"${processor:raw}\"}",
           "instant": true,
           "legendFormat": "associated"
         }
@@ -397,7 +399,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "tessera_devices_statistics_error_count{processor=\"$processor\"}",
+          "expr": "tessera_devices_statistics_error_count{processor=\"${processor:raw}\"}",
           "instant": true,
           "legendFormat": "errors"
         }
@@ -460,7 +462,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "tessera_info{processor=\"$processor\"}",
+          "expr": "tessera_info{processor=\"${processor:raw}\"}",
           "instant": true,
           "format": "table"
         }
@@ -536,7 +538,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"$processor\"}, \"sensor\", \"$1\", \"__name__\", \"tessera_system_temperature_(.+)_celsius\")",
+          "expr": "label_replace({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"${processor:raw}\"}, \"sensor\", \"$1\", \"__name__\", \"tessera_system_temperature_(.+)_celsius\")",
           "legendFormat": "{{sensor}}"
         }
       ],
@@ -590,7 +592,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "label_replace({__name__=~\"tessera_system_fan_.+_speed_rpm\", processor=\"$processor\"}, \"fan\", \"$1\", \"__name__\", \"tessera_system_fan_(.+)_speed_rpm\")",
+          "expr": "label_replace({__name__=~\"tessera_system_fan_.+_speed_rpm\", processor=\"${processor:raw}\"}, \"fan\", \"$1\", \"__name__\", \"tessera_system_fan_(.+)_speed_rpm\")",
           "legendFormat": "{{fan}}"
         }
       ],
@@ -659,7 +661,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "tessera_groups_items_brightness{processor=\"$processor\", number=\"$group\"}",
+              "expr": "tessera_groups_items_brightness{processor=\"${processor:raw}\", number=\"${group:raw}\"}",
               "instant": true,
               "legendFormat": "brightness"
             },
@@ -669,7 +671,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "tessera_groups_items_gamma{processor=\"$processor\", number=\"$group\"}",
+              "expr": "tessera_groups_items_gamma{processor=\"${processor:raw}\", number=\"${group:raw}\"}",
               "instant": true,
               "legendFormat": "gamma"
             }
@@ -713,7 +715,7 @@
           "id": 301,
           "type": "timeseries",
           "title": "$port signal",
-          "description": "Variable-in-metric-name idiom: the port is part of the metric name, so $port is interpolated into the name itself. Gaps are the exporter's sentinel handling — no signal reports -1, which becomes NaN rather than a misleading 0.",
+          "description": "Variable-in-metric-name idiom: the port is part of the metric name, so $port is interpolated into the name itself. Gaps are the exporter's sentinel handling \u2014 no signal reports -1, which becomes NaN rather than a misleading 0.",
           "repeat": "port",
           "repeatDirection": "h",
           "maxPerRow": 3,
@@ -734,7 +736,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "tessera_input_ports_${port}_meta_data_refresh_rate_hertz{processor=\"$processor\"}",
+              "expr": "tessera_input_ports_${port:raw}_meta_data_refresh_rate_hertz{processor=\"${processor:raw}\"}",
               "legendFormat": "refresh rate"
             },
             {
@@ -743,7 +745,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "tessera_input_ports_${port}_meta_data_resolution_width{processor=\"$processor\"}",
+              "expr": "tessera_input_ports_${port:raw}_meta_data_resolution_width{processor=\"${processor:raw}\"}",
               "legendFormat": "width"
             },
             {
@@ -752,7 +754,7 @@
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "tessera_input_ports_${port}_meta_data_resolution_height{processor=\"$processor\"}",
+              "expr": "tessera_input_ports_${port:raw}_meta_data_resolution_height{processor=\"${processor:raw}\"}",
               "legendFormat": "height"
             }
           ],
@@ -811,7 +813,7 @@
         {
           "id": 401,
           "type": "logs",
-          "title": "Syslog — $processor",
+          "title": "Syslog \u2014 $processor",
           "description": "Scoped by source IP, since syslog carries no serial. $instance is derived from $processor, so this follows the drill-down automatically. Requires the optional Loki/Alloy stack; without it the panel is simply empty.",
           "datasource": {
             "type": "loki",
