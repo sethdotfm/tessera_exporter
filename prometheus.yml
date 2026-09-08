@@ -30,6 +30,23 @@ scrape_configs:
         regex: "([^:]+)(:\\d+)?"
         replacement: "$1"
 
+      # Friendly display label for the Grafana dashboards: "<ip> - <location>",
+      # falling back to bare "<ip>" for targets with no location label.
+      # Identity (serial, processor name) is only known from tessera_info, which
+      # a processor stops publishing the moment it goes offline. Keying the
+      # dashboards on this target label instead means an unreachable processor
+      # still gets a row.
+      - source_labels: [instance, location]
+        separator: " - "
+        regex: "(.+) - (.+)"
+        target_label: processor
+        replacement: "$1 - $2"
+      - source_labels: [processor, instance]
+        separator: ";"
+        regex: ";(.+)"
+        target_label: processor
+        replacement: "$1"
+
       # Route all probes through the exporter
       - target_label: __address__
         replacement: "tessera-exporter:19800"

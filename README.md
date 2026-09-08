@@ -43,6 +43,18 @@ scrape_configs:
         target_label: instance
         regex: "([^:]+)(:\\d+)?"
         replacement: "$1"
+      # "<ip> - <location>", falling back to bare "<ip>". The overview dashboard
+      # repeats on this; without it you get no rows.
+      - source_labels: [instance, location]
+        separator: " - "
+        regex: "(.+) - (.+)"
+        target_label: processor
+        replacement: "$1 - $2"
+      - source_labels: [processor, instance]
+        separator: ";"
+        regex: ";(.+)"
+        target_label: processor
+        replacement: "$1"
       - target_label: __address__
         replacement: "tessera-exporter:19800"
   - job_name: tessera_exporter
@@ -68,6 +80,8 @@ Point your processors’ syslog target at the IP of this server, port `514`.
 Severity is normalized into a `level` label (RFC5424's `informational`/`notice`/`warning`/etc. mapped to Grafana's `debug`/`info`/`warn`/`error`/`critical`) so the Logs panel's built-in level coloring works instead of showing everything as `UNK` (unknown).
 
 Retention is 30 days by default, but `debug`/`info`-level lines expire after 24h. See `retention_stream` in `te-syslog-loki/loki-config.yaml` to adjust.
+
+Two more dashboards are statically provisioned alongside it. "Tessera Overview" shows one repeated row per configured processor; clicking any stat in a row opens "Tessera Processor Detail" scoped to that processor. Both key on the `processor` label built by the relabel rules above rather than on serial number, because serial comes from `tessera_info` and a processor stops publishing that the moment it goes offline — so an unreachable processor keeps its row and shows as OFFLINE instead of silently disappearing.
 
 A "Tessera Syslog" dashboard is statically provisioned in Grafana with dropdown filters for serial number, processor name, type, version, and project name. These are the same identity fields `tessera_info` exposes for Prometheus, with an added severity filter derived from the syslog input itself.
 
