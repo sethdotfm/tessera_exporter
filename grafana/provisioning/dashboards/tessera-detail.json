@@ -2491,7 +2491,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Tessera Processor Detail Copy",
+    "title": "Tessera Processor Detail",
     "variables": [
       {
         "kind": "QueryVariable",
