@@ -744,7 +744,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Tessera Overview Copy",
+    "title": "Tessera Overview",
     "variables": [
       {
         "kind": "QueryVariable",
