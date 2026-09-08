@@ -1,840 +1,858 @@
 {
-  "uid": "tessera-overview",
-  "title": "Tessera Overview",
-  "description": "Fleet view. One repeated row per processor Prometheus is configured to scrape, reachable or not. Rows key on the 'processor' target label (\"<ip> - <location>\", built by a relabel rule in prometheus.yml) rather than on serial, because serial comes from tessera_info and a processor stops publishing that the moment it goes offline. Click any stat in a row to open the detail dashboard scoped to that processor.",
-  "tags": [
-    "tessera",
-    "overview"
-  ],
-  "timezone": "browser",
-  "schemaVersion": 39,
-  "version": 1,
-  "editable": true,
-  "graphTooltip": 1,
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
-  "refresh": "30s",
-  "links": [
-    {
-      "title": "Tessera Processor Detail",
-      "type": "dashboards",
-      "tags": [
-        "tessera",
-        "detail"
-      ],
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": true,
-      "keepTime": true,
-      "targetBlank": false
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "advnbvb",
+    "namespace": "default",
+    "uid": "324d53c6-9de8-4567-b04f-86f5459672cd",
+    "resourceVersion": "1788905788529004",
+    "generation": 25,
+    "creationTimestamp": "2026-09-02T09:07:00Z",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "902185697120256"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "user:dfwwehrtbqozkc",
+      "grafana.app/saved-from-ui": "Grafana v13.2.1 (56cd3e9288)",
+      "grafana.app/updatedBy": "user:dfwwehrtbqozkc",
+      "grafana.app/updatedTimestamp": "2026-09-08T22:16:28Z"
     }
-  ],
-  "templating": {
-    "list": [
-      {
-        "name": "site",
-        "label": "Site",
-        "description": "Site label from targets/tessera.yml. \"All\" does not filter, so targets with no site label are still included.",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "query_result(tessera_up)",
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "regex": "/site=\"([^\"]+)\"/"
-      },
-      {
-        "name": "location",
-        "label": "Location",
-        "description": "Location label from targets/tessera.yml. \"All\" does not filter, so targets with no location label are still included.",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "query_result(tessera_up{site=~\"${site:pipe}\"})",
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "regex": "/location=\"([^\"]+)\"/"
-      },
-      {
-        "name": "processor",
-        "label": "Processor",
-        "description": "Drives the row repeat. Sourced from tessera_up, which the exporter emits for every configured target whether the probe succeeded or not, so unreachable processors keep their row. Deliberately has no allValue: a repeat variable set to a catch-all would render one row titled \".*\" instead of one row per processor.",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "query_result(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\"})",
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
-        "regex": "/processor=\"([^\"]+)\"/"
-      }
-    ]
   },
-  "panels": [
-    {
-      "id": 1,
-      "type": "stat",
-      "title": "Processors reachable",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 0,
-        "y": 0
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
           },
-          "expr": "count(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"} == 1) or vector(0)",
-          "instant": true,
-          "legendFormat": "reachable"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "count(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"}) or vector(0)",
-          "instant": true,
-          "legendFormat": "configured"
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
         }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "fixed",
-            "fixedColor": "text"
-          }
-        },
-        "overrides": []
       }
-    },
-    {
-      "id": 2,
-      "type": "stat",
-      "title": "Unreachable",
-      "description": "Processors whose last probe failed. The exporter emits tessera_up 0 for these, so they still appear as a row below.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 4,
-        "y": 0
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "count(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"} == 0) or vector(0)",
-          "instant": true,
-          "legendFormat": "unreachable"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "colorMode": "background_solid",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Panels in error (fleet)",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 8,
-        "y": 0
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "sum(tessera_devices_statistics_error_count{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"}) or vector(0)",
-          "instant": true,
-          "legendFormat": "errors"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "colorMode": "background_solid",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "Hottest sensor per processor",
-      "description": "Maximum across every tessera_system_temperature_*_celsius sensor, per processor.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "max by (processor) ({__name__=~\"tessera_system_temperature_.+_celsius\", site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"})",
-          "legendFormat": "{{processor}}"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "min": 0,
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 5,
-            "showPoints": "never"
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 100,
-      "type": "row",
-      "title": "$processor",
-      "repeat": "processor",
-      "repeatDirection": "v",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "panels": []
-    },
-    {
-      "id": 101,
-      "type": "stat",
-      "title": "Status",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 0,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "tessera_up{processor=\"${processor:raw}\"}",
-          "instant": true,
-          "legendFormat": "status"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "colorMode": "background_solid",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
+    ],
+    "cursorSync": "Crosshair",
+    "editable": true,
+    "elements": {
+      "panel-103": {
+        "kind": "Panel",
+        "spec": {
+          "id": 103,
+          "title": "Panels",
+          "description": "",
+          "links": [
             {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "OFFLINE",
-                  "color": "red",
-                  "index": 0
+              "title": "Open detail for $processor",
+              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
+              "targetBlank": false
+            }
+          ],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "tessera_devices_statistics_online_count{processor=\"${processor:raw}\"}",
+                        "instant": true,
+                        "legendFormat": "online"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
                 },
-                "1": {
-                  "text": "ONLINE",
-                  "color": "green",
-                  "index": 1
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "tessera_devices_statistics_associated_count{processor=\"${processor:raw}\"}",
+                        "instant": true,
+                        "legendFormat": "associated"
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "colorMode": "none",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "horizontal",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "value_and_name",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "links": [
+                    {
+                      "targetBlank": false,
+                      "title": "Open detail for $processor",
+                      "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}"
+                    }
+                  ]
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-107": {
+        "kind": "Panel",
+        "spec": {
+          "id": 107,
+          "title": "Processor Info",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_info{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"} == 1",
+                        "format": "table",
+                        "instant": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true,
+                        "Value": true,
+                        "__name__": true,
+                        "instance": false,
+                        "job": true,
+                        "processor": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "Time": 9,
+                        "Value": 12,
+                        "__name__": 10,
+                        "instance": 0,
+                        "job": 11,
+                        "location": 2,
+                        "processor": 3,
+                        "processor_name": 4,
+                        "processor_type": 6,
+                        "project": 5,
+                        "serial": 8,
+                        "site": 1,
+                        "software_version": 7
+                      },
+                      "renameByName": {
+                        "instance": "IP",
+                        "location": "Location",
+                        "processor": "Processor",
+                        "processor_name": "Name",
+                        "processor_type": "Type",
+                        "project": "Project",
+                        "serial": "Serial",
+                        "site": "Site",
+                        "software_version": "Version"
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "cellHeight": "lg",
+                "enablePagination": true,
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "IP"
+                  }
+                ]
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "mappings": [
+                    {
+                      "type": "special",
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "No Data",
+                          "color": "red",
+                          "index": 0
+                        }
+                      }
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "custom": {
+                    "align": "center",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": false,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "IP"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Site"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Location"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Type"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Version"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Serial"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "/.*/"
+                    },
+                    "properties": [
+                      {
+                        "id": "filterable"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-109": {
+        "kind": "LibraryPanel",
+        "spec": {
+          "id": 109,
+          "title": "",
+          "libraryPanel": {
+            "name": "Upfor",
+            "uid": "dfxo8cs75zq4ge"
+          }
+        }
+      },
+      "panel-110": {
+        "kind": "Panel",
+        "spec": {
+          "id": 110,
+          "title": "Brightness",
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_output_global_colour_brightness{processor=\"${processor:raw}\"}",
+                        "instant": true,
+                        "legendFormat": "Brightness"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "/^Brightness$/",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                  "titleSize": 40,
+                  "valueSize": 40
+                },
+                "textMode": "value",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Nits",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "text"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-111": {
+        "kind": "LibraryPanel",
+        "spec": {
+          "id": 111,
+          "title": "",
+          "libraryPanel": {
+            "name": "Colour Modifiers",
+            "uid": "ffxo99ga5xq80a"
+          }
+        }
+      },
+      "panel-112": {
+        "kind": "LibraryPanel",
+        "spec": {
+          "id": 112,
+          "title": "",
+          "libraryPanel": {
+            "name": "HDMI Status 2",
+            "uid": "cfxo9zl2dpp1cd"
+          }
+        }
+      },
+      "panel-113": {
+        "kind": "LibraryPanel",
+        "spec": {
+          "id": 113,
+          "title": "",
+          "libraryPanel": {
+            "name": "SDI Status 2",
+            "uid": "dfxoa6w696r5sd"
+          }
+        }
+      },
+      "panel-114": {
+        "kind": "LibraryPanel",
+        "spec": {
+          "id": 114,
+          "title": "",
+          "libraryPanel": {
+            "name": "Override Modifiers",
+            "uid": "ffxoapkde0934a"
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "RowsLayout",
+      "spec": {
+        "rows": [
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "$processor",
+              "collapse": false,
+              "hideHeader": false,
+              "repeat": {
+                "mode": "variable",
+                "value": "processor"
+              },
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 4,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-109"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 4,
+                        "y": 0,
+                        "width": 3,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-103"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 7,
+                        "y": 0,
+                        "width": 3,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-110"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 10,
+                        "y": 0,
+                        "width": 8,
+                        "height": 2,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-112"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 18,
+                        "y": 0,
+                        "width": 3,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-114"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 21,
+                        "y": 0,
+                        "width": 3,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-111"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 10,
+                        "y": 2,
+                        "width": 8,
+                        "height": 2,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-113"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "New row",
+              "collapse": false,
+              "hideHeader": true,
+              "layout": {
+                "kind": "AutoGridLayout",
+                "spec": {
+                  "maxColumnCount": 3,
+                  "columnWidthMode": "standard",
+                  "rowHeightMode": "standard",
+                  "items": []
+                }
               }
-            ]
-          },
-          "noValue": "NO DATA",
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
             }
-          ]
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 102,
-      "type": "stat",
-      "title": "Hottest sensor",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 3,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
           },
-          "expr": "max({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"${processor:raw}\"})",
-          "instant": true,
-          "legendFormat": "max temp"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "decimals": 1,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 85
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "",
+              "collapse": false,
+              "hideHeader": true,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 24,
+                        "height": 10,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-107"
+                        }
+                      }
+                    }
+                  ]
+                }
               }
-            ]
-          },
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
             }
-          ]
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 103,
-      "type": "stat",
-      "title": "Panels online",
-      "description": "Online out of associated, from the devices collector.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 6,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "tessera_devices_statistics_online_count{processor=\"${processor:raw}\"}",
-          "instant": true,
-          "legendFormat": "online"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "tessera_devices_statistics_associated_count{processor=\"${processor:raw}\"}",
-          "instant": true,
-          "legendFormat": "associated"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name",
-        "colorMode": "none",
-        "graphMode": "none",
-        "orientation": "horizontal"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
-            }
-          ]
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 104,
-      "type": "stat",
-      "title": "Panel errors",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 3,
-        "x": 9,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "tessera_devices_statistics_error_count{processor=\"${processor:raw}\"}",
-          "instant": true,
-          "legendFormat": "errors"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value",
-        "colorMode": "background_solid",
-        "graphMode": "none"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
-            }
-          ]
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 105,
-      "type": "timeseries",
-      "title": "Temperatures",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 12,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
-      ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "expr": "label_replace({__name__=~\"tessera_system_temperature_.+_celsius\", processor=\"${processor:raw}\"}, \"sensor\", \"$1\", \"__name__\", \"tessera_system_temperature_(.+)_celsius\")",
-          "legendFormat": "{{sensor}}"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "min": 0,
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 1,
-            "fillOpacity": 0,
-            "showPoints": "never"
           }
-        },
-        "overrides": []
+        ]
       }
     },
-    {
-      "id": 106,
-      "type": "table",
-      "title": "Identity",
-      "description": "From tessera_info. Empty while the processor is unreachable \u2014 the row itself comes from tessera_up, which is always present.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
+    "links": [
+      {
+        "title": "Tessera Processor Detail",
+        "type": "dashboards",
+        "icon": "external link",
+        "tooltip": "",
+        "tags": [
+          "tessera",
+          "detail"
+        ],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": true,
+        "keepTime": true
       },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 18,
-        "y": 6
-      },
-      "links": [
-        {
-          "title": "Open detail for $processor",
-          "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-          "targetBlank": false
-        }
+      {
+        "title": "Tessera Syslog",
+        "type": "dashboards",
+        "icon": "external link",
+        "tooltip": "",
+        "tags": [
+          "tessera",
+          "syslog"
+        ],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": true,
+        "keepTime": true
+      }
+    ],
+    "liveNow": false,
+    "preload": false,
+    "tags": [],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-1h",
+      "to": "now",
+      "autoRefresh": "30s",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
       ],
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "Tessera Overview Copy",
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "site",
+          "current": {
+            "text": "All",
+            "value": [
+              "$__all"
+            ]
           },
-          "expr": "tessera_info{processor=\"${processor:raw}\"}",
-          "instant": true,
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "Value": true,
-              "__name__": true,
-              "job": true,
-              "instance": true,
-              "processor": true,
-              "site": true,
-              "location": true
+          "label": "Site",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "",
+          "query": {
+            "kind": "DataQuery",
+            "group": "prometheus",
+            "version": "v0",
+            "datasource": {
+              "name": "prometheus"
             },
-            "indexByName": {
-              "serial": 0,
-              "processor_name": 1,
-              "processor_type": 2,
-              "software_version": 3,
-              "project": 4
-            },
-            "renameByName": {
-              "serial": "Serial",
-              "processor_name": "Name",
-              "processor_type": "Type",
-              "software_version": "Version",
-              "project": "Project"
+            "spec": {
+              "__legacyStringValue": "query_result(tessera_up)"
             }
-          }
-        },
-        {
-          "id": "transpose",
-          "options": {
-            "firstFieldName": "Field",
-            "restFieldsName": "Value"
-          }
-        }
-      ],
-      "options": {
-        "showHeader": false,
-        "cellHeight": "sm"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "filterable": false
           },
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
+          "regex": "/site=\"([^\"]+)\"/",
+          "regexApplyTo": "value",
+          "sort": "alphabeticalAsc",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "location",
+          "current": {
+            "text": "All",
+            "value": [
+              "$__all"
+            ]
+          },
+          "label": "Location",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "",
+          "query": {
+            "kind": "DataQuery",
+            "group": "prometheus",
+            "version": "v0",
+            "datasource": {
+              "name": "prometheus"
+            },
+            "spec": {
+              "__legacyStringValue": "query_result(tessera_up{site=~\"${site:pipe}\"})"
             }
-          ]
-        },
-        "overrides": []
+          },
+          "regex": "/location=\"([^\"]+)\"/",
+          "regexApplyTo": "value",
+          "sort": "alphabeticalAsc",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "processor",
+          "current": {
+            "text": "All",
+            "value": [
+              "$__all"
+            ]
+          },
+          "label": "Processor",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "",
+          "query": {
+            "kind": "DataQuery",
+            "group": "prometheus",
+            "version": "v0",
+            "datasource": {
+              "name": "prometheus"
+            },
+            "spec": {
+              "__legacyStringValue": "query_result(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\"})"
+            }
+          },
+          "regex": "/processor=\"([^\"]+)\"/",
+          "regexApplyTo": "value",
+          "sort": "alphabeticalAsc",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allowCustomValue": true
+        }
       }
-    }
-  ]
+    ]
+  }
 }
