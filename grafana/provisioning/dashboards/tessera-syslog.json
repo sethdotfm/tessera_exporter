@@ -47,7 +47,7 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "Tessera UDP syslog, filterable by the same processor identity fields (serial, name, type, version, project) used to poll the API, plus severity and a free-text regex search. Identity filters resolve to processor IPs via Prometheus, which are matched against the syslog source address — so a processor that Prometheus is not scraping will not appear here. The table panel is click-sortable and column-filterable.",
+    "description": "",
     "editable": true,
     "elements": {
       "panel-1": {
