@@ -388,13 +388,116 @@
         }
       },
       "panel-109": {
-        "kind": "LibraryPanel",
+        "kind": "Panel",
         "spec": {
           "id": 109,
           "title": "",
-          "libraryPanel": {
-            "name": "Upfor",
-            "uid": "dfxo8cs75zq4ge"
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "version": "v0",
+                      "group": "prometheus",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "exemplar": false,
+                        "expr": "(\n  time() - max_over_time(timestamp(tessera_up{processor=~\"${processor:raw}\"} == 0)[24h:1m])\n  or\n  time() - min_over_time(timestamp(tessera_up{processor=~\"${processor:raw}\"})[24h:1m])\n)\nand on(processor) (tessera_up{processor=~\"${processor:raw}\"} == 1)",
+                        "instant": true,
+                        "legendFormat": "Up for:",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "version": "v0",
+                      "group": "prometheus",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "exemplar": false,
+                        "expr": "(\n  max_over_time(timestamp(tessera_up{processor=~\"${processor:raw}\"} == 1)[24h:1m]) - time()\n  or\n  min_over_time(timestamp(tessera_up{processor=~\"${processor:raw}\"})[24h:1m]) - time()\n)\nand on(processor) (tessera_up{processor=~\"${processor:raw}\"} == 0)",
+                        "instant": true,
+                        "legendFormat": "Down since:",
+                        "range": false
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "reduceOptions": {
+                  "values": false,
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": ""
+                },
+                "orientation": "auto",
+                "textMode": "auto",
+                "wideLayout": true,
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "showPercentChange": false,
+                "percentChangeColorMode": "standard",
+                "text": {
+                  "titleSize": 40,
+                  "valueSize": 60
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "unit": "dthms",
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
           }
         }
       },
