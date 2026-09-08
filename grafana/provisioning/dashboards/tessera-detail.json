@@ -2,7 +2,7 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "adktldc",
+    "name": "tessera-detail",
     "namespace": "default",
     "uid": "4eac5969-1c16-4f41-bdbe-d3c9c8773c66",
     "resourceVersion": "1788907976535000",

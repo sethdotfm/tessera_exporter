@@ -2,7 +2,7 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "advnbvb",
+    "name": "tessera-overview",
     "namespace": "default",
     "uid": "324d53c6-9de8-4567-b04f-86f5459672cd",
     "resourceVersion": "1788907775685998",
