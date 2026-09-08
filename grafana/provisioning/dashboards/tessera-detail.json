@@ -5,8 +5,8 @@
     "name": "adktldc",
     "namespace": "default",
     "uid": "4eac5969-1c16-4f41-bdbe-d3c9c8773c66",
-    "resourceVersion": "1788905996275010",
-    "generation": 50,
+    "resourceVersion": "1788907976535000",
+    "generation": 53,
     "creationTimestamp": "2026-09-02T06:25:27Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "861512521805824"
@@ -15,7 +15,7 @@
       "grafana.app/createdBy": "user:dfwwehrtbqozkc",
       "grafana.app/saved-from-ui": "Grafana v13.2.1 (56cd3e9288)",
       "grafana.app/updatedBy": "user:dfwwehrtbqozkc",
-      "grafana.app/updatedTimestamp": "2026-09-08T22:19:56Z"
+      "grafana.app/updatedTimestamp": "2026-09-08T22:52:56Z"
     }
   },
   "spec": {
@@ -41,7 +41,6 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "Single-processor detail view.",
     "editable": true,
     "elements": {
       "panel-10": {
@@ -146,13 +145,88 @@
         }
       },
       "panel-11": {
-        "kind": "LibraryPanel",
+        "kind": "Panel",
         "spec": {
           "id": 11,
           "title": "Brightness",
-          "libraryPanel": {
-            "name": "Brightness",
-            "uid": "ffx1gplnq9jb4d"
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_output_global_colour_brightness{processor=\"${processor:raw}\"}",
+                        "instant": true,
+                        "legendFormat": "Brightness"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "/^Brightness$/",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                  "titleSize": 40,
+                  "valueSize": 60
+                },
+                "textMode": "value",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Nits",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "text"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
           }
         }
       },
@@ -1563,13 +1637,181 @@
         }
       },
       "panel-28": {
-        "kind": "LibraryPanel",
+        "kind": "Panel",
         "spec": {
           "id": 28,
           "title": "",
-          "libraryPanel": {
-            "name": "HDMI Status 2",
-            "uid": "cfxo9zl2dpp1cd"
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_input_ports_hdmi_meta_data_resolution_width{processor=~\"$processor\"}",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_input_ports_hdmi_meta_data_resolution_height{processor=~\"$processor\"}",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "tessera_input_ports_hdmi_meta_data_refresh_rate_hertz{processor=~\"$processor\"}",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "max by (processor) (tessera_input_active_source_port_type_info{processor=~\"$processor\", value=\"hdmi\"})",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "joinByField",
+                  "spec": {
+                    "options": {
+                      "byField": "processor",
+                      "mode": "outer"
+                    }
+                  }
+                },
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {},
+                      "includeByName": {},
+                      "indexByName": {},
+                      "renameByName": {
+                        "Value #A": "height",
+                        "Value #B": "width",
+                        "Value #C": "rate",
+                        "Value #D": "hdmi"
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "marcusolsson-dynamictext-panel",
+            "version": "6.3.0",
+            "spec": {
+              "options": {
+                "afterRender": "",
+                "content": "<div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;{{#if hdmi}}background:#3D71D9;color:#fff;{{/if}}\">HDMI In: {{#if (gt width 0)}}{{width}} × {{height}} at {{rate}}Hz{{else}}No signal{{/if}}</div>",
+                "contentPartials": [],
+                "defaultContent": "No data",
+                "editor": {
+                  "format": "auto",
+                  "language": "handlebars"
+                },
+                "editors": [],
+                "externalStyles": [],
+                "helpers": "",
+                "renderMode": "everyRow",
+                "styles": "",
+                "wrap": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "red"
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              }
+            }
           }
         }
       },
@@ -1680,13 +1922,211 @@
         }
       },
       "panel-5": {
-        "kind": "LibraryPanel",
+        "kind": "Panel",
         "spec": {
           "id": 5,
           "title": "Processor Info",
-          "libraryPanel": {
-            "name": "Processor Info",
-            "uid": "cfx0yjzn9l7uof"
+          "description": "",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "expr": "tessera_info{processor=\"${processor:raw}\"}",
+                        "format": "table",
+                        "instant": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Time": true,
+                        "Value": true,
+                        "__name__": true,
+                        "instance": false,
+                        "job": true,
+                        "processor": true
+                      },
+                      "includeByName": {},
+                      "indexByName": {
+                        "Time": 9,
+                        "Value": 12,
+                        "__name__": 10,
+                        "instance": 0,
+                        "job": 11,
+                        "location": 2,
+                        "processor": 3,
+                        "processor_name": 4,
+                        "processor_type": 6,
+                        "project": 5,
+                        "serial": 8,
+                        "site": 1,
+                        "software_version": 7
+                      },
+                      "renameByName": {
+                        "instance": "IP",
+                        "location": "Location",
+                        "processor": "Processor",
+                        "processor_name": "Name",
+                        "processor_type": "Type",
+                        "project": "Project",
+                        "serial": "Serial",
+                        "site": "Site",
+                        "software_version": "Version"
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.2.1",
+            "spec": {
+              "options": {
+                "cellHeight": "lg",
+                "enablePagination": false,
+                "showHeader": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "custom": {
+                    "align": "center",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": false,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "IP"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 120
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Site"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Location"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 200
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Type"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Version"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "scope": "series",
+                      "options": "Serial"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "/.*/"
+                    },
+                    "properties": [
+                      {
+                        "id": "filterable"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
           }
         }
       },
@@ -2470,7 +2910,10 @@
     ],
     "liveNow": false,
     "preload": false,
-    "tags": [],
+    "tags": [
+      "detail",
+      "tessera"
+    ],
     "timeSettings": {
       "timezone": "browser",
       "from": "now-1h",
