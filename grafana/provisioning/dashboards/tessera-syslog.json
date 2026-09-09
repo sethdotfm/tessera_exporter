@@ -4,12 +4,12 @@
   "metadata": {
     "name": "tessera-syslog",
     "namespace": "default",
-    "uid": "0782bfe3-7000-4af3-9bf2-85d1e502aa75",
-    "resourceVersion": "1788906260003011",
-    "generation": 11,
-    "creationTimestamp": "2026-09-01T19:03:49Z",
+    "uid": "4a1f4512-f820-4d19-8e15-ca79dcde804b",
+    "resourceVersion": "1788911476566991",
+    "generation": 2,
+    "creationTimestamp": "2026-09-08T23:33:48Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "689989412167680"
+      "grafana.app/deprecatedInternalID": "3294648025780224"
     },
     "annotations": {
       "grafana.app/createdBy": "access-policy:service",
@@ -17,11 +17,11 @@
       "grafana.app/managerAllowsEdits": "true",
       "grafana.app/managerId": "tessera_exporter",
       "grafana.app/saved-from-ui": "Grafana v13.2.1 (56cd3e9288)",
-      "grafana.app/sourceChecksum": "7eb5e3211def0313c9d363cd3e2e361e",
+      "grafana.app/sourceChecksum": "0ace4a2a9a36174046ae4bb33756a976",
       "grafana.app/sourcePath": "/etc/grafana/provisioning/dashboards/tessera-syslog.json",
-      "grafana.app/sourceTimestamp": "1788336472000",
-      "grafana.app/updatedBy": "user:dfwwehrtbqozkc",
-      "grafana.app/updatedTimestamp": "2026-09-08T22:24:19Z"
+      "grafana.app/sourceTimestamp": "1788909974000",
+      "grafana.app/updatedBy": "user:afxoiimyo20owb",
+      "grafana.app/updatedTimestamp": "2026-09-08T23:51:16Z"
     }
   },
   "spec": {
@@ -47,7 +47,6 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "",
     "editable": true,
     "elements": {
       "panel-1": {
@@ -901,7 +900,23 @@
         ]
       }
     },
-    "links": [],
+    "links": [
+      {
+        "title": "Tessera Overview",
+        "type": "dashboards",
+        "icon": "external link",
+        "tooltip": "",
+        "url": "",
+        "tags": [
+          "tessera",
+          "overview"
+        ],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": true,
+        "keepTime": true
+      }
+    ],
     "liveNow": false,
     "preload": false,
     "tags": [
