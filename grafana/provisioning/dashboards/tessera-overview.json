@@ -471,8 +471,8 @@
                 "showPercentChange": false,
                 "percentChangeColorMode": "standard",
                 "text": {
-                  "titleSize": 40,
-                  "valueSize": 60
+                  "titleSize": 30,
+                  "valueSize": 40
                 }
               },
               "fieldConfig": {
