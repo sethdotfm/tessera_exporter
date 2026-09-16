@@ -3,27 +3,7 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "tessera-syslog",
-    "namespace": "default",
-    "uid": "c8cc583c-78ee-45c6-a3a0-1ac38badc069",
-    "resourceVersion": "1789080918153986",
-    "generation": 4,
-    "creationTimestamp": "2026-09-10T21:11:49Z",
-    "labels": {
-      "grafana.app/deprecatedInternalID": "3983695309717504"
-    },
-    "annotations": {
-      "grafana.app/createdBy": "access-policy:service",
-      "grafana.app/folder": "cfxvarn091j40c",
-      "grafana.app/managedBy": "classic-file-provisioning",
-      "grafana.app/managerId": "tessera",
-      "grafana.app/sourceChecksum": "d2d69f4931b7d6b15231c05c4ceea971",
-      "grafana.app/sourcePath": "/etc/grafana/provisioning/dashboards/tessera/tessera-syslog.json",
-      "grafana.app/sourceTimestamp": "1789080913000",
-      "grafana.app/updatedBy": "access-policy:service",
-      "grafana.app/updatedTimestamp": "2026-09-10T22:55:18Z",
-      "grafana.app/folderTitle": "Tessera",
-      "grafana.app/folderUrl": "/dashboards/f/cfxvarn091j40c/tessera"
-    }
+    "namespace": "default"
   },
   "spec": {
     "annotations": [
