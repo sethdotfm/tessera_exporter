@@ -34,7 +34,7 @@ scrape_configs:
     scrape_timeout: 6s
     metrics_path: /probe
     file_sd_configs:
-      - files: [/etc/prometheus/tessera_targets/*.yml]
+      - files: [targets/*.yml]
         refresh_interval: 30s
     relabel_configs:
       - source_labels: [__address__]
@@ -66,8 +66,13 @@ Mount the targets directory into your Prometheus container:
 
 ```yaml
 volumes:
-  - ./targets:/etc/prometheus/tessera_targets:ro
+  - ./targets:/etc/prometheus/targets:ro
 ```
+
+Prometheus resolves a relative `file_sd` path against the directory holding your
+`prometheus.yml`, not the process working directory — so `targets/*.yml` above finds
+`/etc/prometheus/targets/`. If you already have a `targets/` directory there, mount
+this one under a different name and change the glob to match.
 
 ---
 
