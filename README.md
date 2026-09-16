@@ -76,13 +76,27 @@ the configuration this project is actually deployed with.
 # macOS, from this directory:
 brew install grafana-alloy
 
-# Install the tessera_exporter config, backing up any existing one first
-[ -f /opt/homebrew/etc/grafana-alloy/config.alloy ] && cp /opt/homebrew/etc/grafana-alloy/config.alloy /opt/homebrew/etc/grafana-alloy/config.alloy.old
+# Install the tessera_exporter config
+mkdir -p /opt/homebrew/etc/grafana-alloy
 cp te-syslog-alloy/config-native.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
 
 sudo brew services start grafana-alloy   # start
 sudo brew services stop grafana-alloy    # stop
 ```
+
+**Homebrew points Alloy at that whole directory, not at a single file** — the
+service runs `alloy run /opt/homebrew/etc/grafana-alloy`, and Alloy combines
+*every* `*.alloy` file in it into one config. So:
+
+- The filename doesn't matter. `config.alloy` is just a convention.
+- **A second `*.alloy` file in there will be merged in, not ignored.** Two configs
+  that both declare `loki.source.syslog "tessera"` is a duplicate component name,
+  and Alloy exits immediately rather than starting.
+- If you want to keep an old config alongside it, give it an extension that isn't
+  `.alloy` (`config.alloy.old` is fine) or move it out of the directory entirely.
+
+Homebrew creates the directory empty — it ships no default config — so on a fresh
+install there is nothing to back up and nothing to conflict with.
 
 To **restart** after editing the config, go through launchd directly:
 
