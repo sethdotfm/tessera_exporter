@@ -82,6 +82,11 @@ Tessera processors send their operational log over UDP syslog. By default `docke
 
 Point your processors’ syslog target at the IP of this server, port `514`.
 
+Alloy runs with `network_mode: host`, sharing the host's network stack so it sees each
+processor's real source address — which is what the dashboard's per-processor filtering
+depends on. That also means it binds `:514` itself rather than taking a published port,
+so the container runs as `root`. This is the configuration the project is deployed with.
+
 Severity is normalized into a `level` label (RFC5424's `informational`/`notice`/`warning`/etc. mapped to Grafana's `debug`/`info`/`warn`/`error`/`critical`) so the Logs panel's built-in level coloring works instead of showing everything as `UNK` (unknown).
 
 Retention is 30 days by default, but `debug`/`info`-level lines expire after 24h. See `retention_stream` in `te-syslog-loki/loki-config.yaml` to adjust.
@@ -119,7 +124,7 @@ Set `LOKI_URL` if Loki isn't on `http://localhost:3101`. A single query is cappe
 
 A "Tessera Syslog" dashboard is statically provisioned in Grafana with dropdown filters for serial number, processor name, type, version, and project name. These are the same identity fields `tessera_info` exposes for Prometheus, with an added severity filter derived from the syslog input itself.
 
-**On macOS or Windows**, identity filtering won't work if alloy runs in Docker. This is because Docker Desktop rewrites the source IP of all UDP traffic arriving on a published port; as a result, every log line looks like it came from the same address. Native Linux Docker hosts aren't susceptible to these rewrites.
+**On macOS or Windows**, identity filtering won't work if Alloy runs in Docker. Docker Desktop runs containers inside a VM whose proxy rewrites the source IP of UDP traffic, so every log line looks like it came from the same address — and `network_mode: host` does not get you the host's real interface there either. Native Linux Docker hosts aren't susceptible to this.
 
 When running on macOS/Windows, simply run Alloy natively on the host instead. The remaining Loki, Grafana, Prometheus, and tessera-exporter images can remain in Docker.
 
@@ -132,7 +137,7 @@ brew install grafana-alloy
 
 # Install the tessera_exporter config
 mkdir -p /opt/homebrew/etc/grafana-alloy
-cp te-syslog-alloy/config-native.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
+cp te-syslog-alloy/config.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
 
 # To bring up the service
 sudo brew services start grafana-alloy
@@ -162,7 +167,47 @@ of starting. Keep any old copy under an extension that isn't `.alloy`, or move i
 pgrep -f '/opt/homebrew/opt/grafana-alloy/bin/alloy'
 ```
 
-`te-syslog-alloy/config-native.alloy` is the same pipeline as `te-syslog-alloy/config.alloy`, just listening on `:514` directly and pushing to Loki's published port (`127.0.0.1:3101`) instead of compose DNS.
+`te-syslog-alloy/config.alloy` is the same file the Docker service uses — it already
+listens on `:514` and pushes to Loki's published port (`127.0.0.1:3101`), which is
+correct both under `network_mode: host` and for a native install. There is no separate
+"native" config to keep in sync.
+
+### Several instances on one host
+
+To take syslog on more than one reception port — separate groups of processors, or a
+port already spoken for — use `te-syslog-alloy/config-bridge.alloy` instead. It listens
+on `:1514` inside the container and reaches Loki over compose DNS, so the published
+port selects the reception port and one config serves every instance:
+
+```yaml
+  tessera-exporter-syslog-alloy-2:
+    container_name: 'tessera-exporter-syslog-alloy-2'
+    image: grafana/alloy:latest
+    ports:
+      - "515:1514/udp"          # reception port for this instance
+    volumes:
+      - ./te-syslog-alloy/config-bridge.alloy:/etc/alloy/config.alloy:ro
+      - te-syslog-alloy-2-data:/var/lib/alloy/data   # its own volume
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12346"    # its own HTTP port
+      - "--storage.path=/var/lib/alloy/data"
+      - "/etc/alloy/config.alloy"
+    restart: unless-stopped
+```
+
+Give each instance its own storage volume and its own `--server.http.listen-addr`;
+sharing either will fail. Note this is **Linux only** — see the Docker Desktop note
+above — and it is less proven than the default. Source addresses survive because
+external packets reach the container through iptables DNAT, which rewrites only the
+destination; that is documented behaviour rather than something measured here, so
+check `connection_ip_address` in Loki before relying on per-processor filtering.
+
+Do **not** set `"userland-proxy": false` in `daemon.json` if source IPs look wrong.
+With it disabled the daemon can bind the published UDP port and swallow the traffic,
+and long-lived UDP streams like syslog are the documented casualty
+([moby/libnetwork#2423](https://github.com/moby/libnetwork/issues/2423), still open).
+Use the default host-networked service instead.
 
 ---
 
