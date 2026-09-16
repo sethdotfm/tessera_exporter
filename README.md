@@ -136,27 +136,62 @@ pgrep -f '/opt/homebrew/opt/grafana-alloy/bin/alloy'
 
 ### Windows
 
-Install Alloy with [winget or the graphical installer](https://grafana.com/docs/alloy/latest/set-up/install/windows/)
+> **Windows Firewall blocks inbound UDP 514 by default, and the Alloy installer does
+> not open it.** Every other step can be perfect and you will still receive nothing,
+> with no error anywhere — Alloy sits waiting on a port the packets never reach. This
+> is step 3 below, and it is not optional.
+
+**1. Install Alloy** with [winget or the graphical installer](https://grafana.com/docs/alloy/latest/set-up/install/windows/)
 (`alloy-installer-windows-amd64.exe` from the GitHub releases page). It installs to
 `%PROGRAMFILES%\GrafanaLabs\Alloy` and registers itself as a Windows service set to
 start automatically.
 
-Copy this repo's config over the one the installer drops in:
+**2. Install the config** — **from an elevated prompt**:
 
 ```
 copy te-syslog-alloy\config.alloy "%PROGRAMFILES%\GrafanaLabs\Alloy\config.alloy"
 ```
 
-Then restart the service — `services.msc`, right-click **Alloy**, *All Tasks → Restart*.
-Do that after every config edit; Alloy reads the file only at startup.
+Writing to `%PROGRAMFILES%` fails from a normal prompt. Depending on your shell that
+can pass by quietly, leaving the installer's default config in place and Alloy running
+happily while collecting nothing. Confirm it actually landed:
+
+```powershell
+Get-Content "$env:PROGRAMFILES\GrafanaLabs\Alloy\config.alloy" | Select-String "tessera_syslog_raw"
+```
+
+No output means the copy did not take.
+
+**3. Open UDP 514 inbound** — elevated PowerShell:
+
+```powershell
+New-NetFirewallRule -DisplayName "Tessera syslog" -Direction Inbound -Protocol UDP -LocalPort 514 -Action Allow
+```
+
+**4. Restart the service** — `services.msc`, right-click **Alloy**, *All Tasks →
+Restart*. Do this after every config edit; Alloy reads the file only at startup.
+
+**5. Verify**, before you need it to work. This sends a syslog packet to Alloy over
+loopback, testing Alloy and Loki without involving the network or the processors:
+
+```powershell
+$u=New-Object System.Net.Sockets.UdpClient
+$b=[Text.Encoding]::ASCII.GetBytes("<134>Sep 16 10:00:00 tessera: test message")
+$u.Send($b,$b.Length,"127.0.0.1",514)
+
+curl.exe -s "http://localhost:3101/loki/api/v1/label/job/values"
+```
+
+`tessera_syslog` in the response means Alloy and Loki are working, and anything still
+missing is between the processors and this host — firewall, the processors' syslog
+target, or simply nothing having happened yet (Tessera emits on events, not on a
+timer; recall a preset or toggle blackout to force lines out). Nothing back means the
+problem is local: check `Get-Service Alloy` and `Get-NetUDPEndpoint -LocalPort 514`.
 
 Unlike the macOS install, the service is pointed at that one file rather than a
 directory, so a stray second `.alloy` file next to it is ignored. Command-line
 arguments live in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\GrafanaLabs\Alloy`
 if you need to change them.
-
-Untested against a Tessera rig — the macOS path above is the one in regular use. The
-config file itself is identical, so only the install and restart mechanics differ.
 
 ### Either way
 
@@ -165,8 +200,8 @@ config file itself is identical, so only the install and restart mechanics diffe
 native install and under `network_mode: host` alike — there is no separate config to
 keep in sync.
 
-Make sure nothing else on the machine already has UDP `514`, and that your firewall
-allows it inbound. On Windows the installer does not open the port for you.
+Make sure nothing else on the machine already holds UDP `514`, and that your firewall
+allows it inbound — see step 3 above for the Windows rule.
 
 Running several receivers on one host, each on its own port, is a Linux-only
 arrangement using `te-syslog-alloy/config-bridge.alloy`; see the
@@ -222,6 +257,13 @@ provisioning directory.
 ---
 
 ## Notes
+
+**No syslog arriving, but metrics are fine?** On Windows, check the firewall rule
+first — inbound UDP `514` is blocked by default and the Alloy installer does not open
+it, which produces exactly this: dashboards populated, syslog panel empty, nothing
+logged anywhere. See step 3 under [Windows](#windows). Next most likely is the config
+copy silently failing without an elevated prompt, then the processors simply having
+nothing to report — Tessera emits on events, not on a timer.
 
 **`scrape_interval` is 6s.** Brompton's only stated limit is to not poll multiple times
 per second. They warn that frequent polling may cause adverse performance on the
