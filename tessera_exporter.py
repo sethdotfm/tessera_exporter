@@ -555,6 +555,22 @@ in the Tessera UI) or /probe will return <code>tessera_up 0</code> with
 """
 
 
+def build_self_metrics() -> str:
+    """Render the exporter's own /metrics body.
+
+    This is the entire contents of /metrics -- processor data lives on /probe.
+    The version label is the hand-maintained VERSION constant above, which CI
+    pins to the release tag on publish so it cannot drift from the image it
+    ships in (v1.0.0 and v1.0.1 both went out reporting 0.1.0).
+    """
+    lines = [
+        "# HELP tessera_exporter_build_info Exporter version info",
+        "# TYPE tessera_exporter_build_info gauge",
+        f'tessera_exporter_build_info{{version="{VERSION}"}} 1',
+    ]
+    return "\n".join(lines) + "\n"
+
+
 class TesseraHandler(BaseHTTPRequestHandler):
     """HTTP request handler for the Tessera exporter."""
 
@@ -600,12 +616,7 @@ class TesseraHandler(BaseHTTPRequestHandler):
         self._send(200, ctype, body.encode())
 
     def _serve_self_metrics(self) -> None:
-        lines = [
-            '# HELP tessera_exporter_build_info Exporter version info',
-            '# TYPE tessera_exporter_build_info gauge',
-            f'tessera_exporter_build_info{{version="{VERSION}"}} 1',
-        ]
-        self._send(200, _PROM_CONTENT_TYPE, ("\n".join(lines) + "\n").encode())
+        self._send(200, _PROM_CONTENT_TYPE, build_self_metrics().encode())
 
     def _send(self, code: int, ctype: str, body: bytes) -> None:
         self.send_response(code)

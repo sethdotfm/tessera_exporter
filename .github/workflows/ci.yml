@@ -64,6 +64,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # tessera_exporter_build_info is the only metric on /metrics, and its
+      # version label is a hand-maintained constant. v1.0.0 and v1.0.1 were
+      # both published reporting version="0.1.0"; fail the release instead.
+      - name: Check VERSION matches the release tag
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(sed -n 's/^VERSION = "\(.*\)"$/\1/p' tessera_exporter.py)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not read VERSION from tessera_exporter.py"
+            exit 1
+          fi
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match VERSION=$VERSION in tessera_exporter.py"
+            echo "Bump VERSION to $TAG (or retag) before publishing."
+            exit 1
+          fi
+          echo "VERSION $VERSION matches tag $GITHUB_REF_NAME"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
