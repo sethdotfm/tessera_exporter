@@ -64,13 +64,21 @@ keeps its row and shows as OFFLINE instead of silently disappearing. **If you ed
 
 ## Syslog (optional)
 
-Tessera processors send their operational log over UDP syslog. Loki (storage) runs in
-this compose stack; **Alloy (the receiver) has to run natively on the host.**
+Tessera processors send their operational log over UDP syslog. Both the receiver
+(Alloy) and storage (Loki) are in this compose stack. Point your processors' syslog
+target at this host, port `514`.
 
-Docker Desktop rewrites the source IP of UDP traffic arriving on a published port, so
-every log line would look like it came from the same address and the dashboard's
-per-processor filtering would not work. Running Alloy on the host avoids that, and is
-the configuration this project is actually deployed with.
+**On Linux this works as shipped.** Alloy runs with `network_mode: host`, sharing the
+host's network stack so it sees each processor's real source address — which is what
+the dashboard's per-processor filtering depends on. That also means it binds `:514`
+itself rather than taking a published port, so the container runs as `root`. This is
+the configuration the project is deployed with.
+
+**On macOS or Windows, comment the `tessera-exporter-syslog-alloy` service out and
+install Alloy natively instead.** Docker Desktop runs containers in a VM whose proxy
+rewrites the UDP source IP, so every log line would arrive from the same address —
+and `network_mode: host` does not get you the host's real interface there either. The
+rest of the stack can stay in Docker.
 
 ```bash
 # macOS, from this directory:
@@ -78,7 +86,7 @@ brew install grafana-alloy
 
 # Install the tessera_exporter config
 mkdir -p /opt/homebrew/etc/grafana-alloy
-cp te-syslog-alloy/config-native.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
+cp te-syslog-alloy/config.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
 
 sudo brew services start grafana-alloy   # start
 sudo brew services stop grafana-alloy    # stop
@@ -114,7 +122,28 @@ reports `Running: false` and may not restart anything. Confirm the PID changed:
 pgrep -f '/opt/homebrew/opt/grafana-alloy/bin/alloy'
 ```
 
-Then point your processors' syslog target at this host, port `514`.
+`te-syslog-alloy/config.alloy` is the same file the Docker service uses — it already
+listens on `:514` and pushes to Loki's published port (`127.0.0.1:3101`), correct both
+under host networking and for a native install.
+
+### Several instances on one host
+
+To take syslog on more than one reception port, use `te-syslog-alloy/config-bridge.alloy`
+instead. It listens on `:1514` inside the container and reaches Loki over compose DNS,
+so the published port selects the reception port (`515:1514/udp`, and so on) and one
+config serves every instance. Give each its own storage volume and its own
+`--server.http.listen-addr`.
+
+This is **Linux only** — see the Docker Desktop note above — and less proven than the
+default. Source addresses survive because external packets reach the container through
+iptables DNAT, which rewrites only the destination; that is documented behaviour rather
+than something measured here, so check `connection_ip_address` in Loki before relying on
+per-processor filtering.
+
+Do **not** set `"userland-proxy": false` in `daemon.json` if source IPs look wrong. With
+it disabled the daemon can bind the published UDP port and swallow the traffic, and
+long-lived UDP streams like syslog are the documented casualty
+([moby/libnetwork#2423](https://github.com/moby/libnetwork/issues/2423), still open).
 
 Severity is normalized into a `level` label (RFC5424's `informational`/`notice`/`warning`
 mapped to Grafana's `debug`/`info`/`warn`/`error`/`critical`) so the Logs panel's level
