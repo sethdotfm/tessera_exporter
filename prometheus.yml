@@ -1,4 +1,4 @@
-# tessera_exporter prometheus.yml // Version 1.1.0
+# tessera_exporter prometheus.yml // Version 1.1.1
 # https://github.com/sethdotfm/tessera_exporter
 global:
   scrape_interval: 30s
@@ -8,11 +8,17 @@ scrape_configs:
 #   ▼▼▼ ADD THESE LINES TO YOUR PROMETHEUS CONFIGURATION FILE'S 'scrape_configs' SECTION ▼▼▼
   # https://github.com/sethdotfm/tessera_exporter
   - job_name: tessera
-    scrape_interval: 30s # Brompton officially recommends polling no faster than every 30s
+    # Brompton's only stated limit is to not poll multiple times per second.
+    # scrape_timeout is pinned to match the interval. Left unset it inherits
+    # the 10s global default, which Prometheus then silently clamps down to
+    # the interval anyway — spelling it out keeps the exporter's own probe
+    # budget (derived from this value) obvious rather than implied.
+    scrape_interval: 6s
+    scrape_timeout: 6s
     metrics_path: /probe
     file_sd_configs:
-      - files:
-          - targets/tessera.yml
+      - files: [/etc/prometheus/tessera_targets/*.yml]
+        refresh_interval: 30s
     relabel_configs:
       # Pass the target address to the exporter as the 'target' param
       - source_labels: [__address__]
@@ -22,6 +28,23 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
         regex: "([^:]+)(:\\d+)?"
+        replacement: "$1"
+
+      # Friendly display label for the Grafana dashboards: "<ip> - <location>",
+      # falling back to bare "<ip>" for targets with no location label.
+      # Identity (serial, processor name) is only known from tessera_info, which
+      # a processor stops publishing the moment it goes offline. Keying the
+      # dashboards on this target label instead means an unreachable processor
+      # still gets a row.
+      - source_labels: [instance, location]
+        separator: " - "
+        regex: "(.+) - (.+)"
+        target_label: processor
+        replacement: "$1 - $2"
+      - source_labels: [processor, instance]
+        separator: ";"
+        regex: ";(.+)"
+        target_label: processor
         replacement: "$1"
 
       # Route all probes through the exporter

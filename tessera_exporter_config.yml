@@ -1,4 +1,4 @@
-# tessera_exporter CONFIGURATION FILE // Version 1.1.0
+# tessera_exporter CONFIGURATION FILE // Version 1.1.1
 # https://github.com/sethdotfm/tessera_exporter
 #
 # Note: disabling a collector does NOT reduce load on the processor or the exporter. All endpoints are fetched, then filtered according to this config.

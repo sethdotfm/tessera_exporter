@@ -40,12 +40,26 @@ compactor:
 
 limits_config:
   retention_period: 720h # 30d default, for anything not matched below
+  # Loki otherwise invents a `detected_level` label for any stream that lacks
+  # `level`. The verbatim stream deliberately has no `level` (severity is kept
+  # untranslated in syslog_severity), so Loki tagged every one of its lines
+  # `unknown` and Grafana's log panel rendered a column of UNK badges.
+  # The dashboard stream sets `level` explicitly and never needed discovery.
+  discover_log_levels: false
   retention_stream:
     # Debug-level chatter is the vast majority of syslog volume and isn't
     # worth keeping long. Adjust the selector if you want a different split.
     - selector: '{job="tessera_syslog", level=~"debug|info"}'
       priority: 1
       period: 24h
+    # The verbatim archive (te-syslog-alloy: loki.process "tessera_raw") keeps
+    # everything the dashboard stream drops, so it is the larger of the two.
+    # It exists to hand a complete log to the manufacturer after an incident,
+    # which is a short-horizon need -- 7d by default. Raise it if you need a
+    # longer window, and watch disk if you do.
+    - selector: '{job="tessera_syslog_raw"}'
+      priority: 10
+      period: 168h
 
 analytics:
   reporting_enabled: false
