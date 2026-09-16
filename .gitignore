@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Python caches, left behind by running the exporter source from this directory
+__pycache__/
+*.py[codz]
+.pytest_cache/
+
+# Claude
+.claude/
