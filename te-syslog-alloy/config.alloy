@@ -1,12 +1,21 @@
-// tessera_exporter te-syslog-alloy/config.alloy // Version 1.1.0
+// tessera_exporter te-syslog-alloy/config.alloy // Version 1.1.1
 // https://github.com/sethdotfm/tessera_exporter
 //
-// Receives Tessera's syslog output (BSD/RFC3164 format, sent over UDP) and forwards it to Loki. Tessera processors send syslog to <this_host>:514 by default.
-// The port mapping in docker-compose.yml maps that to 1514 inside this container so Alloy doesn't need to run as root.
+// The default config. It listens on :514 and pushes to Loki's published host
+// port, which suits both ways this is actually run:
+//
+//   - the docker-compose 'tessera-exporter-syslog-alloy' service, which uses
+//     network_mode: host (Linux). The container shares the host's network, so
+//     there is no port remap and no compose DNS -- 127.0.0.1 IS the host.
+//   - a native install on macOS/Windows, where Docker Desktop's proxy rewrites
+//     the UDP source IP and Alloy has to run outside Docker. See the README.
+//
+// For running several instances on one host, each on its own reception port,
+// see te-syslog-alloy/config-bridge.alloy.
 
 loki.source.syslog "tessera" {
   listener {
-    address       = "0.0.0.0:1514"
+    address       = "0.0.0.0:514"
     protocol      = "udp"
     syslog_format = "rfc3164"
     labels        = { job = "tessera_syslog" }
@@ -57,10 +66,8 @@ loki.relabel "tessera" {
     target_label  = "syslog_proc_id"
   }
 
-  // Grafana's Logs panel colors/badges lines by a "level" label using its
-  // own vocabulary (debug/info/warn/error/critical); syslog's RFC5424
-  // severity names (informational, notice, warning, ...) don't match that
-  // vocabulary, so every line showed up as "UNK". Map them explicitly.
+  // Grafana's Logs panel colors/badges lines by a "level" label using its own vocabulary (debug/info/warn/error/critical).
+  // Syslog's RFC5424 severity names (informational, notice, warning, ...) don't match that vocabulary, so every line shows up as "UNK" unless you map them explicitly.
   rule {
     source_labels = ["__syslog_message_severity"]
     regex         = "debug"
@@ -93,10 +100,7 @@ loki.relabel "tessera" {
   }
 }
 
-// Drop known-routine/noisy messages here before they're stored in Loki.
-// Each stage.drop below matches on the raw message text. Add your own
-// stage.drop blocks for whatever turns out to be noise on your system;
-// these two are just examples from Tessera's own routine autosave chatter.
+// You can drop known-routine/noisy messages here before they're stored in Loki.
 loki.process "tessera" {
   stage.drop {
     expression          = "(?i)commencing auto save operation"
@@ -159,6 +163,6 @@ loki.process "tessera_raw" {
 
 loki.write "tessera" {
   endpoint {
-    url = "http://tessera-exporter-syslog-loki:3100/loki/api/v1/push"
+    url = "http://127.0.0.1:3101/loki/api/v1/push"
   }
 }

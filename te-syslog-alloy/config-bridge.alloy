@@ -1,16 +1,34 @@
-// tessera_exporter te-syslog-alloy/config-native.alloy // Version 1.1.0
+// tessera_exporter te-syslog-alloy/config-bridge.alloy // Version 1.1.1
 // https://github.com/sethdotfm/tessera_exporter
 //
-// macOS/Windows hosts need to run Alloy NATIVELY instead of in Docker.
-// See the README for details.
+// Receives Tessera's syslog output (BSD/RFC3164 over UDP) and forwards it to Loki.
 //
-// Differences from te-syslog-alloy/config.alloy (For Docker):
-//   - Listens on :514 directly (no docker-compose port remap to 1514)
-//   - Pushes to Loki via its published host port instead of compose DNS
+// The bridge-networked variant, for running SEVERAL Alloy instances on one host,
+// each taking a different reception port. It listens on :1514 inside the container
+// and reaches Loki over compose DNS, so the published port is what selects the
+// reception port: "514:1514/udp", "515:1514/udp", and so on. One config, many
+// instances. Listening above 1024 also means it does not need to run as root.
+//
+// LINUX ONLY, and less proven than te-syslog-alloy/config.alloy:
+//
+//   - On Docker Desktop (macOS/Windows) this cannot work. The VM's proxy rewrites
+//     the UDP source address, so every processor arrives as the same IP and the
+//     dashboard's per-processor filtering collapses.
+//   - On native Linux, external packets reach the container through iptables DNAT,
+//     which rewrites only the destination, so source IPs should survive. That is
+//     the documented behaviour rather than something measured here -- if your
+//     per-processor filtering looks wrong, check connection_ip_address in Loki
+//     before trusting it.
+//
+// Do NOT set "userland-proxy": false in daemon.json to try to fix a source-IP
+// problem. With it disabled the daemon can bind the published UDP port and
+// swallow the traffic; long-lived UDP streams like syslog are the documented
+// casualty (moby/libnetwork#2423, still open). Use config.alloy with
+// network_mode: host instead.
 
 loki.source.syslog "tessera" {
   listener {
-    address       = "0.0.0.0:514"
+    address       = "0.0.0.0:1514"
     protocol      = "udp"
     syslog_format = "rfc3164"
     labels        = { job = "tessera_syslog" }
@@ -61,8 +79,10 @@ loki.relabel "tessera" {
     target_label  = "syslog_proc_id"
   }
 
-  // Grafana's Logs panel colors/badges lines by a "level" label using its own vocabulary (debug/info/warn/error/critical).
-  // Syslog's RFC5424 severity names (informational, notice, warning, ...) don't match that vocabulary, so every line shows up as "UNK" unless you map them explicitly.
+  // Grafana's Logs panel colors/badges lines by a "level" label using its
+  // own vocabulary (debug/info/warn/error/critical); syslog's RFC5424
+  // severity names (informational, notice, warning, ...) don't match that
+  // vocabulary, so every line showed up as "UNK". Map them explicitly.
   rule {
     source_labels = ["__syslog_message_severity"]
     regex         = "debug"
@@ -95,7 +115,10 @@ loki.relabel "tessera" {
   }
 }
 
-// You can drop known-routine/noisy messages here before they're stored in Loki.
+// Drop known-routine/noisy messages here before they're stored in Loki.
+// Each stage.drop below matches on the raw message text. Add your own
+// stage.drop blocks for whatever turns out to be noise on your system;
+// these two are just examples from Tessera's own routine autosave chatter.
 loki.process "tessera" {
   stage.drop {
     expression          = "(?i)commencing auto save operation"
@@ -158,6 +181,6 @@ loki.process "tessera_raw" {
 
 loki.write "tessera" {
   endpoint {
-    url = "http://127.0.0.1:3101/loki/api/v1/push"
+    url = "http://tessera-exporter-syslog-loki:3100/loki/api/v1/push"
   }
 }
