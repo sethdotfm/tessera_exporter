@@ -4,18 +4,25 @@
   "metadata": {
     "name": "tessera-overview",
     "namespace": "default",
-    "uid": "324d53c6-9de8-4567-b04f-86f5459672cd",
-    "resourceVersion": "1788907775685998",
-    "generation": 27,
-    "creationTimestamp": "2026-09-02T09:07:00Z",
+    "uid": "bab7070a-c2d1-47e7-a3a3-e25503e88f41",
+    "resourceVersion": "1789075418230006",
+    "generation": 2,
+    "creationTimestamp": "2026-09-10T21:11:49Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "902185697120256"
+      "grafana.app/deprecatedInternalID": "3983695255191552"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:dfwwehrtbqozkc",
-      "grafana.app/saved-from-ui": "Grafana v13.2.1 (56cd3e9288)",
-      "grafana.app/updatedBy": "user:dfwwehrtbqozkc",
-      "grafana.app/updatedTimestamp": "2026-09-08T22:49:35Z"
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/folder": "cfxvarn091j40c",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerId": "tessera",
+      "grafana.app/sourceChecksum": "637ea6b29ccba64e5e465493d052f0e8",
+      "grafana.app/sourcePath": "/etc/grafana/provisioning/dashboards/tessera/tessera-overview.json",
+      "grafana.app/sourceTimestamp": "1789075413000",
+      "grafana.app/updatedBy": "access-policy:service",
+      "grafana.app/updatedTimestamp": "2026-09-10T21:23:38Z",
+      "grafana.app/folderTitle": "Tessera",
+      "grafana.app/folderUrl": "/dashboards/f/cfxvarn091j40c/tessera"
     }
   },
   "spec": {
@@ -23,20 +30,20 @@
       {
         "kind": "AnnotationQuery",
         "spec": {
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana",
-            "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
-          },
+          "builtIn": true,
           "enable": true,
           "hide": true,
           "iconColor": "rgba(0, 211, 255, 1)",
           "name": "Annotations & Alerts",
-          "builtIn": true
+          "query": {
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "group": "grafana",
+            "kind": "DataQuery",
+            "spec": {},
+            "version": "v0"
+          }
         }
       }
     ],
@@ -46,16 +53,6 @@
       "panel-103": {
         "kind": "Panel",
         "spec": {
-          "id": 103,
-          "title": "Panels",
-          "description": "",
-          "links": [
-            {
-              "title": "Open detail for $processor",
-              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}",
-              "targetBlank": false
-            }
-          ],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -63,53 +60,83 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "tessera_devices_statistics_online_count{processor=\"${processor:raw}\"}",
                         "instant": true,
                         "legendFormat": "online"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "expr": "tessera_devices_statistics_associated_count{processor=\"${processor:raw}\"}",
                         "instant": true,
                         "legendFormat": "associated"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 103,
+          "links": [],
+          "title": "Panels",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "decimals": 0,
+                  "links": [
+                    {
+                      "targetBlank": false,
+                      "title": "Open detail for $processor",
+                      "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "none",
                 "graphMode": "none",
@@ -126,45 +153,15 @@
                 "showPercentChange": false,
                 "textMode": "value_and_name",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "short",
-                  "decimals": 0,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "links": [
-                    {
-                      "targetBlank": false,
-                      "title": "Open detail for $processor",
-                      "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}"
-                    }
-                  ]
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       },
       "panel-107": {
         "kind": "Panel",
         "spec": {
-          "id": 107,
-          "title": "Processor Info",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -172,29 +169,30 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_info{site=~\"${site:pipe}\", location=~\"${location:pipe}\", processor=~\"${processor:pipe}\"} == 1",
                         "format": "table",
                         "instant": true
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "organize",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "excludeByName": {
@@ -235,50 +233,19 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 107,
+          "links": [],
+          "title": "Processor Info",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "table",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "cellHeight": "lg",
-                "enablePagination": true,
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": false,
-                    "displayName": "IP"
-                  }
-                ]
-              },
               "fieldConfig": {
                 "defaults": {
-                  "mappings": [
-                    {
-                      "type": "special",
-                      "options": {
-                        "match": "null",
-                        "result": {
-                          "text": "No Data",
-                          "color": "red",
-                          "index": 0
-                        }
-                      }
-                    }
-                  ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      }
-                    ]
-                  },
                   "custom": {
                     "align": "center",
                     "cellOptions": {
@@ -289,14 +256,36 @@
                       "reducers": []
                     },
                     "inspect": false
+                  },
+                  "mappings": [
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "color": "red",
+                          "index": 0,
+                          "text": "No Data"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      }
+                    ]
                   }
                 },
                 "overrides": [
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "IP"
+                      "options": "IP",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -308,8 +297,8 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "Site"
+                      "options": "Site",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -321,8 +310,8 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "Location"
+                      "options": "Location",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -334,8 +323,8 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "Type"
+                      "options": "Type",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -347,8 +336,8 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "Version"
+                      "options": "Version",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -360,8 +349,8 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "scope": "series",
-                      "options": "Serial"
+                      "options": "Serial",
+                      "scope": "series"
                     },
                     "properties": [
                       {
@@ -382,18 +371,26 @@
                     ]
                   }
                 ]
+              },
+              "options": {
+                "cellHeight": "lg",
+                "enablePagination": true,
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "IP"
+                  }
+                ]
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       },
       "panel-109": {
         "kind": "Panel",
         "spec": {
-          "id": 109,
-          "title": "",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -401,13 +398,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "version": "v0",
-                      "group": "prometheus",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -415,22 +412,22 @@
                         "instant": true,
                         "legendFormat": "Up for:",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "version": "v0",
-                      "group": "prometheus",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -438,76 +435,103 @@
                         "instant": true,
                         "legendFormat": "Down since:",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 109,
+          "links": [
+            {
+              "title": "Show Details",
+              "url": "/d/tessera-detail/tessera-processor-detail?var-processor=${processor:percentencode}&${__url_time_range}"
+            }
+          ],
+          "title": "Uptime | View Details",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
-              "options": {
-                "reduceOptions": {
-                  "values": false,
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": ""
-                },
-                "orientation": "auto",
-                "textMode": "auto",
-                "wideLayout": true,
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "showPercentChange": false,
-                "percentChangeColorMode": "standard",
-                "text": {
-                  "titleSize": 30,
-                  "valueSize": 40
-                }
-              },
               "fieldConfig": {
                 "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [
+                    {
+                      "options": {
+                        "from": 82800,
+                        "result": {
+                          "index": 1,
+                          "text": "More than a day"
+                        }
+                      },
+                      "type": "range"
+                    },
+                    {
+                      "options": {
+                        "result": {
+                          "index": 2,
+                          "text": "More than a day"
+                        },
+                        "to": -82800
+                      },
+                      "type": "range"
+                    }
+                  ],
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
                       {
-                        "value": null,
-                        "color": "red"
+                        "color": "red",
+                        "value": 0
                       },
                       {
-                        "value": 0,
-                        "color": "green"
+                        "color": "green",
+                        "value": 0
                       }
                     ]
                   },
-                  "unit": "dthms",
-                  "color": {
-                    "mode": "thresholds"
-                  }
+                  "unit": "dthms"
                 },
                 "overrides": []
+              },
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                  "titleSize": 30,
+                  "valueSize": 40
+                },
+                "textMode": "value_and_name",
+                "wideLayout": true
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       },
       "panel-110": {
         "kind": "Panel",
         "spec": {
-          "id": 110,
-          "title": "Brightness",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -515,34 +539,56 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_output_global_colour_brightness{processor=\"${processor:raw}\"}",
                         "instant": true,
                         "legendFormat": "Brightness"
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 }
               ],
-              "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {},
+              "transformations": []
             }
           },
+          "description": "",
+          "id": 110,
+          "links": [],
+          "title": "Brightness",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "Nits"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "value",
                 "graphMode": "area",
@@ -563,37 +609,15 @@
                 },
                 "textMode": "value",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "Nits",
-                  "decimals": 0,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "text"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       },
       "panel-111": {
         "kind": "Panel",
         "spec": {
-          "id": 111,
-          "title": "",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -601,13 +625,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -615,22 +639,22 @@
                         "instant": true,
                         "legendFormat": "Colour Replace",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -638,22 +662,22 @@
                         "instant": true,
                         "legendFormat": "3D LUT",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -661,22 +685,22 @@
                         "instant": true,
                         "legendFormat": "Curves",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "C",
-                    "hidden": false
+                    "refId": "C"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -684,17 +708,18 @@
                         "instant": true,
                         "legendFormat": "14-Way CC",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "D",
-                    "hidden": false
+                    "refId": "D"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "filterFieldsByName",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "include": {
@@ -708,15 +733,63 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 111,
+          "links": [],
+          "title": "",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "#ad46ff",
+                    "mode": "thresholds"
+                  },
+                  "decimals": 0,
+                  "mappings": [
+                    {
+                      "options": {
+                        "0": {
+                          "index": 1,
+                          "text": "Off"
+                        },
+                        "1": {
+                          "color": "blue",
+                          "index": 0,
+                          "text": "On"
+                        }
+                      },
+                      "type": "value"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "index": 2,
+                          "text": "No Colour Processing Active"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "background",
                 "graphMode": "none",
@@ -737,64 +810,15 @@
                 },
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "short",
-                  "decimals": 0,
-                  "mappings": [
-                    {
-                      "type": "value",
-                      "options": {
-                        "0": {
-                          "text": "Off",
-                          "index": 1
-                        },
-                        "1": {
-                          "text": "On",
-                          "color": "blue",
-                          "index": 0
-                        }
-                      }
-                    },
-                    {
-                      "type": "special",
-                      "options": {
-                        "match": "null",
-                        "result": {
-                          "text": "No Colour Processing Active",
-                          "index": 2
-                        }
-                      }
-                    }
-                  ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "text"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds",
-                    "fixedColor": "#ad46ff"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       },
       "panel-112": {
         "kind": "Panel",
         "spec": {
-          "id": 112,
-          "title": "",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -802,13 +826,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_hdmi_meta_data_resolution_width{processor=~\"$processor\"}",
@@ -816,22 +840,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_hdmi_meta_data_resolution_height{processor=~\"$processor\"}",
@@ -839,22 +863,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_hdmi_meta_data_refresh_rate_hertz{processor=~\"$processor\"}",
@@ -862,22 +886,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "C",
-                    "hidden": false
+                    "refId": "C"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "max by (processor) (tessera_input_active_source_port_type_info{processor=~\"$processor\", value=\"hdmi\"})",
@@ -885,17 +909,18 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "D",
-                    "hidden": false
+                    "refId": "D"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "joinByField",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "byField": "processor",
@@ -904,8 +929,8 @@
                   }
                 },
                 {
-                  "kind": "Transformation",
                   "group": "organize",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "excludeByName": {},
@@ -920,18 +945,38 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 112,
+          "links": [],
+          "title": "",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "marcusolsson-dynamictext-panel",
-            "version": "6.3.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "afterRender": "",
-                "content": "<div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;{{#if hdmi}}background:#3D71D9;color:#fff;{{/if}}\">HDMI In: {{#if (gt width 0)}}{{width}} × {{height}} at {{rate}}Hz{{else}}No signal{{/if}}</div>",
+                "content": "<div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;{{#if hdmi}}background:#3D71D9;color:#fff;{{/if}}\">HDMI In: {{#if (gt width 0)}}{{width}} × {{height}} at {{rate}}Hz{{else}}No signal{{/if}}</div>",
                 "contentPartials": [],
                 "defaultContent": "No data",
                 "editor": {
@@ -944,36 +989,15 @@
                 "renderMode": "everyRow",
                 "styles": "",
                 "wrap": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "6.3.0"
           }
         }
       },
       "panel-113": {
         "kind": "Panel",
         "spec": {
-          "id": 113,
-          "title": "",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -981,13 +1005,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_sdi_meta_data_resolution_width{processor=~\"$processor\"}",
@@ -995,22 +1019,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_sdi_meta_data_resolution_height{processor=~\"$processor\"}",
@@ -1018,22 +1042,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "tessera_input_ports_sdi_meta_data_refresh_rate_hertz{processor=~\"$processor\"}",
@@ -1041,22 +1065,22 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "C",
-                    "hidden": false
+                    "refId": "C"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "expr": "max by (processor) (tessera_input_active_source_port_type_info{processor=~\"$processor\", value=\"sdi\"})",
@@ -1064,17 +1088,18 @@
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "D",
-                    "hidden": false
+                    "refId": "D"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "joinByField",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "byField": "processor",
@@ -1083,8 +1108,8 @@
                   }
                 },
                 {
-                  "kind": "Transformation",
                   "group": "organize",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "excludeByName": {},
@@ -1099,18 +1124,38 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 113,
+          "links": [],
+          "title": "",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "marcusolsson-dynamictext-panel",
-            "version": "6.3.0",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": 0
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
               "options": {
                 "afterRender": "",
-                "content": "<div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;{{#if sdi}}background:#3D71D9;color:#fff;{{/if}}\">SDI In: {{#if (gt width 0)}}{{width}} × {{height}} at {{rate}}Hz{{else}}No signal{{/if}}</div>",
+                "content": "<div style=\"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;{{#if sdi}}background:#3D71D9;color:#fff;{{/if}}\">SDI In: {{#if (gt width 0)}}{{width}} × {{height}} at {{rate}}Hz{{else}}No signal{{/if}}</div>",
                 "contentPartials": [],
                 "defaultContent": "No data",
                 "editor": {
@@ -1123,36 +1168,15 @@
                 "renderMode": "everyRow",
                 "styles": "",
                 "wrap": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "6.3.0"
           }
         }
       },
       "panel-114": {
         "kind": "Panel",
         "spec": {
-          "id": 114,
-          "title": "",
-          "description": "",
-          "links": [],
           "data": {
             "kind": "QueryGroup",
             "spec": {
@@ -1160,13 +1184,13 @@
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -1174,22 +1198,22 @@
                         "instant": true,
                         "legendFormat": "Pattern",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "A",
-                    "hidden": false
+                    "refId": "A"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -1197,22 +1221,22 @@
                         "instant": true,
                         "legendFormat": "Freeze",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "B",
-                    "hidden": false
+                    "refId": "B"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -1220,22 +1244,22 @@
                         "instant": true,
                         "legendFormat": "Blackout",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "C",
-                    "hidden": false
+                    "refId": "C"
                   }
                 },
                 {
                   "kind": "PanelQuery",
                   "spec": {
+                    "hidden": false,
                     "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
                       "datasource": {
                         "name": "prometheus"
                       },
+                      "group": "prometheus",
+                      "kind": "DataQuery",
                       "spec": {
                         "editorMode": "code",
                         "exemplar": false,
@@ -1243,17 +1267,18 @@
                         "instant": true,
                         "legendFormat": "Scaler",
                         "range": false
-                      }
+                      },
+                      "version": "v0"
                     },
-                    "refId": "D",
-                    "hidden": false
+                    "refId": "D"
                   }
                 }
               ],
+              "queryOptions": {},
               "transformations": [
                 {
-                  "kind": "Transformation",
                   "group": "filterFieldsByName",
+                  "kind": "Transformation",
                   "spec": {
                     "options": {
                       "include": {
@@ -1267,15 +1292,63 @@
                     }
                   }
                 }
-              ],
-              "queryOptions": {}
+              ]
             }
           },
+          "description": "",
+          "id": 114,
+          "links": [],
+          "title": "",
           "vizConfig": {
-            "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "kind": "VizConfig",
             "spec": {
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "fixedColor": "#ad46ff",
+                    "mode": "thresholds"
+                  },
+                  "decimals": 0,
+                  "mappings": [
+                    {
+                      "options": {
+                        "0": {
+                          "index": 1,
+                          "text": "Off"
+                        },
+                        "1": {
+                          "color": "blue",
+                          "index": 0,
+                          "text": "On"
+                        }
+                      },
+                      "type": "value"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "index": 2,
+                          "text": "No Overrides Active"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "text",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "unit": "short"
+                },
+                "overrides": []
+              },
               "options": {
                 "colorMode": "background",
                 "graphMode": "none",
@@ -1296,54 +1369,9 @@
                 },
                 "textMode": "auto",
                 "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "short",
-                  "decimals": 0,
-                  "mappings": [
-                    {
-                      "type": "value",
-                      "options": {
-                        "0": {
-                          "text": "Off",
-                          "index": 1
-                        },
-                        "1": {
-                          "text": "On",
-                          "color": "blue",
-                          "index": 0
-                        }
-                      }
-                    },
-                    {
-                      "type": "special",
-                      "options": {
-                        "match": "null",
-                        "result": {
-                          "text": "No Overrides Active",
-                          "index": 2
-                        }
-                      }
-                    }
-                  ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "text"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds",
-                    "fixedColor": "#ad46ff"
-                  }
-                },
-                "overrides": []
               }
-            }
+            },
+            "version": "13.2.1"
           }
         }
       }
@@ -1355,13 +1383,8 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "$processor",
               "collapse": false,
               "hideHeader": false,
-              "repeat": {
-                "mode": "variable",
-                "value": "processor"
-              },
               "layout": {
                 "kind": "GridLayout",
                 "spec": {
@@ -1369,120 +1392,124 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 4,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-109"
-                        }
+                        },
+                        "height": 4,
+                        "width": 4,
+                        "x": 0,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 4,
-                        "y": 0,
-                        "width": 3,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-103"
-                        }
+                        },
+                        "height": 4,
+                        "width": 3,
+                        "x": 4,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 7,
-                        "y": 0,
-                        "width": 3,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-110"
-                        }
+                        },
+                        "height": 4,
+                        "width": 3,
+                        "x": 7,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 10,
-                        "y": 0,
-                        "width": 8,
-                        "height": 2,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-112"
-                        }
+                        },
+                        "height": 2,
+                        "width": 8,
+                        "x": 10,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 18,
-                        "y": 0,
-                        "width": 3,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-114"
-                        }
+                        },
+                        "height": 4,
+                        "width": 3,
+                        "x": 18,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 21,
-                        "y": 0,
-                        "width": 3,
-                        "height": 4,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-111"
-                        }
+                        },
+                        "height": 4,
+                        "width": 3,
+                        "x": 21,
+                        "y": 0
                       }
                     },
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 10,
-                        "y": 2,
-                        "width": 8,
-                        "height": 2,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-113"
-                        }
+                        },
+                        "height": 2,
+                        "width": 8,
+                        "x": 10,
+                        "y": 2
                       }
                     }
                   ]
                 }
-              }
+              },
+              "repeat": {
+                "mode": "variable",
+                "value": "processor"
+              },
+              "title": "$processor"
             }
           },
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "New row",
               "collapse": false,
               "hideHeader": true,
               "layout": {
                 "kind": "AutoGridLayout",
                 "spec": {
-                  "maxColumnCount": 3,
                   "columnWidthMode": "standard",
-                  "rowHeightMode": "standard",
-                  "items": []
+                  "items": [],
+                  "maxColumnCount": 3,
+                  "rowHeightMode": "standard"
                 }
-              }
+              },
+              "title": "New row"
             }
           },
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "",
               "collapse": false,
               "hideHeader": true,
               "layout": {
@@ -1492,19 +1519,20 @@
                     {
                       "kind": "GridLayoutItem",
                       "spec": {
-                        "x": 0,
-                        "y": 0,
-                        "width": 24,
-                        "height": 10,
                         "element": {
                           "kind": "ElementReference",
                           "name": "panel-107"
-                        }
+                        },
+                        "height": 10,
+                        "width": 24,
+                        "x": 0,
+                        "y": 0
                       }
                     }
                   ]
                 }
-              }
+              },
+              "title": ""
             }
           }
         ]
@@ -1512,32 +1540,32 @@
     },
     "links": [
       {
-        "title": "Tessera Processor Detail",
-        "type": "dashboards",
+        "asDropdown": false,
         "icon": "external link",
-        "tooltip": "",
+        "includeVars": true,
+        "keepTime": true,
         "tags": [
           "tessera",
           "detail"
         ],
-        "asDropdown": false,
         "targetBlank": false,
-        "includeVars": true,
-        "keepTime": true
+        "title": "Tessera Processor Detail",
+        "tooltip": "",
+        "type": "dashboards"
       },
       {
-        "title": "Tessera Syslog",
-        "type": "dashboards",
+        "asDropdown": false,
         "icon": "external link",
-        "tooltip": "",
+        "includeVars": true,
+        "keepTime": true,
         "tags": [
           "tessera",
           "syslog"
         ],
-        "asDropdown": false,
         "targetBlank": false,
-        "includeVars": true,
-        "keepTime": true
+        "title": "Tessera Syslog",
+        "tooltip": "",
+        "type": "dashboards"
       }
     ],
     "liveNow": false,
@@ -1547,9 +1575,6 @@
       "tessera"
     ],
     "timeSettings": {
-      "timezone": "browser",
-      "from": "now-1h",
-      "to": "now",
       "autoRefresh": "30s",
       "autoRefreshIntervals": [
         "5s",
@@ -1563,116 +1588,119 @@
         "2h",
         "1d"
       ],
+      "fiscalYearStartMonth": 0,
+      "from": "now-1h",
       "hideTimepicker": false,
-      "fiscalYearStartMonth": 0
+      "timezone": "browser",
+      "to": "now"
     },
     "title": "Tessera Overview",
     "variables": [
       {
         "kind": "QueryVariable",
         "spec": {
-          "name": "site",
+          "allValue": ".*",
+          "allowCustomValue": true,
           "current": {
             "text": "All",
             "value": [
               "$__all"
             ]
           },
-          "label": "Site",
-          "hide": "dontHide",
-          "refresh": "onDashboardLoad",
-          "skipUrlSync": false,
           "description": "",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Site",
+          "multi": true,
+          "name": "site",
+          "options": [],
           "query": {
-            "kind": "DataQuery",
-            "group": "prometheus",
-            "version": "v0",
             "datasource": {
               "name": "prometheus"
             },
+            "group": "prometheus",
+            "kind": "DataQuery",
             "spec": {
               "__legacyStringValue": "query_result(tessera_up)"
-            }
+            },
+            "version": "v0"
           },
+          "refresh": "onDashboardLoad",
           "regex": "/site=\"([^\"]+)\"/",
           "regexApplyTo": "value",
-          "sort": "alphabeticalAsc",
-          "options": [],
-          "multi": true,
-          "includeAll": true,
-          "allValue": ".*",
-          "allowCustomValue": true
+          "skipUrlSync": false,
+          "sort": "alphabeticalAsc"
         }
       },
       {
         "kind": "QueryVariable",
         "spec": {
-          "name": "location",
+          "allValue": ".*",
+          "allowCustomValue": true,
           "current": {
             "text": "All",
             "value": [
               "$__all"
             ]
           },
-          "label": "Location",
-          "hide": "dontHide",
-          "refresh": "onDashboardLoad",
-          "skipUrlSync": false,
           "description": "",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Location",
+          "multi": true,
+          "name": "location",
+          "options": [],
           "query": {
-            "kind": "DataQuery",
-            "group": "prometheus",
-            "version": "v0",
             "datasource": {
               "name": "prometheus"
             },
+            "group": "prometheus",
+            "kind": "DataQuery",
             "spec": {
               "__legacyStringValue": "query_result(tessera_up{site=~\"${site:pipe}\"})"
-            }
+            },
+            "version": "v0"
           },
+          "refresh": "onDashboardLoad",
           "regex": "/location=\"([^\"]+)\"/",
           "regexApplyTo": "value",
-          "sort": "alphabeticalAsc",
-          "options": [],
-          "multi": true,
-          "includeAll": true,
-          "allValue": ".*",
-          "allowCustomValue": true
+          "skipUrlSync": false,
+          "sort": "alphabeticalAsc"
         }
       },
       {
         "kind": "QueryVariable",
         "spec": {
-          "name": "processor",
+          "allowCustomValue": true,
           "current": {
             "text": "All",
             "value": [
               "$__all"
             ]
           },
-          "label": "Processor",
-          "hide": "dontHide",
-          "refresh": "onDashboardLoad",
-          "skipUrlSync": false,
           "description": "",
+          "hide": "dontHide",
+          "includeAll": true,
+          "label": "Processor",
+          "multi": true,
+          "name": "processor",
+          "options": [],
           "query": {
-            "kind": "DataQuery",
-            "group": "prometheus",
-            "version": "v0",
             "datasource": {
               "name": "prometheus"
             },
+            "group": "prometheus",
+            "kind": "DataQuery",
             "spec": {
               "__legacyStringValue": "query_result(tessera_up{site=~\"${site:pipe}\", location=~\"${location:pipe}\"})"
-            }
+            },
+            "version": "v0"
           },
+          "refresh": "onDashboardLoad",
           "regex": "/processor=\"([^\"]+)\"/",
           "regexApplyTo": "value",
-          "sort": "alphabeticalAsc",
-          "options": [],
-          "multi": true,
-          "includeAll": true,
-          "allowCustomValue": true
+          "skipUrlSync": false,
+          "sort": "alphabeticalAsc"
         }
       }
     ]
