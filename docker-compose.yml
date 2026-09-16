@@ -1,4 +1,4 @@
-# tessera_exporter DOCKER COMPOSE // Version 1.1.0
+# tessera_exporter DOCKER COMPOSE // Version 1.1.1
 # https://github.com/sethdotfm/tessera_exporter
 name: tessera-exporter
 services:
@@ -7,35 +7,21 @@ services:
     container_name: 'tessera-exporter'
     image: ghcr.io/sethdotfm/tessera_exporter:latest
     ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      - "19800:19800"
     volumes:
       - ./tessera_exporter_config.yml:/app/tessera.yml:ro
     restart: unless-stopped
 
 # ▼▼▼ ADD THESE OPTIONAL LINES TO ENABLE THE SYSLOG MONITOR ▼▼▼
-#     COMMENT THEM OUT IF RUNNING ON WINDOWS OR MACOS
-#  tessera-exporter-syslog-alloy:
-#    container_name: 'tessera-exporter-syslog-alloy'
-#    image: grafana/alloy:latest
-#    ports:
-#      - "514:1514/udp"
-#    volumes:
-#      - ./te-syslog-alloy/config.alloy:/etc/alloy/config.alloy:ro
-#      - te-syslog-alloy-data:/var/lib/alloy/data
-#    command:
-#      - "run"
-#      - "--server.http.listen-addr=0.0.0.0:12345"
-#      - "--storage.path=/var/lib/alloy/data"
-#      - "/etc/alloy/config.alloy"
-#    restart: unless-stopped
-#    depends_on:
-#      - tessera-exporter-syslog-loki
-
+#
+#     Loki stores the logs; Alloy receives them from the processors and runs
+#     NATIVELY on the host, not in Docker. Docker Desktop rewrites the source
+#     IP of UDP traffic arriving on a published port, so every log line would
+#     look like it came from the same address and the dashboard's per-processor
+#     filtering would not work. Install Alloy with te-syslog-alloy/config-native.alloy
+#     and point your processors' syslog target at this host, port 514.
+#     See the README.
+#
   tessera-exporter-syslog-loki:
     container_name: 'tessera-exporter-syslog-loki'
     image: grafana/loki:latest
@@ -48,38 +34,39 @@ services:
       - "-config.file=/etc/loki/local-config.yaml"
     restart: unless-stopped
 
-
 #   ▲▲▲ That's it! ▲▲▲
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./targets:/etc/prometheus/targets:ro # MOUNT TARGETS FILE
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.retention.time=30d
-      - --web.enable-lifecycle
-    volumes:
       - prometheus-data:/prometheus
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./targets:/etc/prometheus/tessera_targets:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./targets:/etc/prometheus/tessera_targets:ro # MOUNT TARGETS FILE
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
     restart: unless-stopped
+    depends_on:
+      - tessera-exporter
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    environment:
+      # Required by the Tessera Overview and Detail dashboards.
+      GF_INSTALL_PLUGINS: "marcusolsson-dynamictext-panel"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     restart: unless-stopped
-
+    depends_on:
+      - prometheus
+      - tessera-exporter-syslog-loki
 
 volumes:
-  te-syslog-alloy-data:
   te-syslog-loki-data:
+  prometheus-data:
   grafana-data:
