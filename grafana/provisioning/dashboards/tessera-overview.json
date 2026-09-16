@@ -3,27 +3,7 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "tessera-overview",
-    "namespace": "default",
-    "uid": "bab7070a-c2d1-47e7-a3a3-e25503e88f41",
-    "resourceVersion": "1789075418230006",
-    "generation": 2,
-    "creationTimestamp": "2026-09-10T21:11:49Z",
-    "labels": {
-      "grafana.app/deprecatedInternalID": "3983695255191552"
-    },
-    "annotations": {
-      "grafana.app/createdBy": "access-policy:service",
-      "grafana.app/folder": "cfxvarn091j40c",
-      "grafana.app/managedBy": "classic-file-provisioning",
-      "grafana.app/managerId": "tessera",
-      "grafana.app/sourceChecksum": "637ea6b29ccba64e5e465493d052f0e8",
-      "grafana.app/sourcePath": "/etc/grafana/provisioning/dashboards/tessera/tessera-overview.json",
-      "grafana.app/sourceTimestamp": "1789075413000",
-      "grafana.app/updatedBy": "access-policy:service",
-      "grafana.app/updatedTimestamp": "2026-09-10T21:23:38Z",
-      "grafana.app/folderTitle": "Tessera",
-      "grafana.app/folderUrl": "/dashboards/f/cfxvarn091j40c/tessera"
-    }
+    "namespace": "default"
   },
   "spec": {
     "annotations": [
