@@ -17,8 +17,8 @@ scrape_configs:
     scrape_timeout: 6s
     metrics_path: /probe
     file_sd_configs:
-      - files:
-          - targets/tessera.yml
+      - files: [/etc/prometheus/tessera_targets/*.yml]
+        refresh_interval: 30s
     relabel_configs:
       # Pass the target address to the exporter as the 'target' param
       - source_labels: [__address__]
