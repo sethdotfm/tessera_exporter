@@ -14,14 +14,33 @@ services:
 
 # ▼▼▼ ADD THESE OPTIONAL LINES TO ENABLE THE SYSLOG MONITOR ▼▼▼
 #
-#     Loki stores the logs; Alloy receives them from the processors and runs
-#     NATIVELY on the host, not in Docker. Docker Desktop rewrites the source
-#     IP of UDP traffic arriving on a published port, so every log line would
-#     look like it came from the same address and the dashboard's per-processor
-#     filtering would not work. Install Alloy with te-syslog-alloy/config-native.alloy
-#     and point your processors' syslog target at this host, port 514.
-#     See the README.
+#     ON macOS OR WINDOWS: comment out the 'tessera-exporter-syslog-alloy'
+#     service below and run Alloy natively on the host instead. Docker Desktop
+#     rewrites the source IP of UDP traffic, so every log line would look like
+#     it came from the same address and the dashboard's per-processor filtering
+#     would not work. See the README.
 #
+  tessera-exporter-syslog-alloy:
+    container_name: 'tessera-exporter-syslog-alloy'
+    image: grafana/alloy:latest
+    # Shares the host's network stack, so Alloy sees each processor's real
+    # source address. Published ports are not available under host networking,
+    # which is why the config listens on :514 directly and why root is needed
+    # to bind it. The HTTP server below binds host :12345.
+    network_mode: host
+    user: root
+    volumes:
+      - ./te-syslog-alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - te-syslog-alloy-data:/var/lib/alloy/data
+    command:
+      - "run"
+      - "--server.http.listen-addr=0.0.0.0:12345"
+      - "--storage.path=/var/lib/alloy/data"
+      - "/etc/alloy/config.alloy"
+    restart: unless-stopped
+    depends_on:
+      - tessera-exporter-syslog-loki
+
   tessera-exporter-syslog-loki:
     container_name: 'tessera-exporter-syslog-loki'
     image: grafana/loki:latest
@@ -43,7 +62,7 @@ services:
     volumes:
       - prometheus-data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./targets:/etc/prometheus/tessera_targets:ro # MOUNT TARGETS FILE
+      - ./targets:/etc/prometheus/targets:ro # MOUNT TARGETS FILE
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.retention.time=30d"
@@ -67,6 +86,7 @@ services:
       - tessera-exporter-syslog-loki
 
 volumes:
+  te-syslog-alloy-data:
   te-syslog-loki-data:
   prometheus-data:
   grafana-data:

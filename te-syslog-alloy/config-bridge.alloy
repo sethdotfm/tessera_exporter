@@ -1,0 +1,186 @@
+// tessera_exporter te-syslog-alloy/config-bridge.alloy // Version 1.1.1
+// https://github.com/sethdotfm/tessera_exporter
+//
+// Receives Tessera's syslog output (BSD/RFC3164 over UDP) and forwards it to Loki.
+//
+// The bridge-networked variant, for running SEVERAL Alloy instances on one host,
+// each taking a different reception port. It listens on :1514 inside the container
+// and reaches Loki over compose DNS, so the published port is what selects the
+// reception port: "514:1514/udp", "515:1514/udp", and so on. One config, many
+// instances. Listening above 1024 also means it does not need to run as root.
+//
+// LINUX ONLY, and less proven than te-syslog-alloy/config.alloy:
+//
+//   - On Docker Desktop (macOS/Windows) this cannot work. The VM's proxy rewrites
+//     the UDP source address, so every processor arrives as the same IP and the
+//     dashboard's per-processor filtering collapses.
+//   - On native Linux, external packets reach the container through iptables DNAT,
+//     which rewrites only the destination, so source IPs should survive. That is
+//     the documented behaviour rather than something measured here -- if your
+//     per-processor filtering looks wrong, check connection_ip_address in Loki
+//     before trusting it.
+//
+// Do NOT set "userland-proxy": false in daemon.json to try to fix a source-IP
+// problem. With it disabled the daemon can bind the published UDP port and
+// swallow the traffic; long-lived UDP streams like syslog are the documented
+// casualty (moby/libnetwork#2423, still open). Use config.alloy with
+// network_mode: host instead.
+
+loki.source.syslog "tessera" {
+  listener {
+    address       = "0.0.0.0:1514"
+    protocol      = "udp"
+    syslog_format = "rfc3164"
+    labels        = { job = "tessera_syslog" }
+    // DO NOT set use_incoming_timestamp here. Tessera's frames carry no
+    // parseable timestamp (nor hostname nor proc_id), so Alloy yields the zero
+    // time and every push fails with "before 0001-01-01", killing BOTH streams.
+    // Entries are stamped with Alloy's receipt time instead.
+  }
+
+  relabel_rules = loki.relabel.tessera.rules
+  forward_to    = [loki.process.tessera.receiver, loki.process.tessera_raw.receiver]
+}
+
+// Promotes only the syslog fields the dashboard actually filters on into
+// real Loki labels. Avoid labelmap-ing everything __syslog_* exposes:
+// fields like connection_hostname (DNS-resolved) or message_proc_id
+// (changes on every process restart) are high-cardinality and would blow
+// up Loki's stream count for no query benefit.
+loki.relabel "tessera" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__syslog_connection_ip_address"]
+    target_label  = "connection_ip_address"
+  }
+  rule {
+    source_labels = ["__syslog_message_facility"]
+    target_label  = "message_facility"
+  }
+
+  // ── Preserved for the verbatim archive branch (loki.process.tessera_raw) ──
+  // The severity mapping further down is lossy: it collapses RFC5424's names
+  // into Grafana's five. Keep the original string before that happens.
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    target_label  = "syslog_severity"
+  }
+  rule {
+    source_labels = ["__syslog_message_hostname"]
+    target_label  = "syslog_hostname"
+  }
+  rule {
+    source_labels = ["__syslog_message_app_name"]
+    target_label  = "syslog_app_name"
+  }
+  rule {
+    source_labels = ["__syslog_message_proc_id"]
+    target_label  = "syslog_proc_id"
+  }
+
+  // Grafana's Logs panel colors/badges lines by a "level" label using its
+  // own vocabulary (debug/info/warn/error/critical); syslog's RFC5424
+  // severity names (informational, notice, warning, ...) don't match that
+  // vocabulary, so every line showed up as "UNK". Map them explicitly.
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    regex         = "debug"
+    target_label  = "level"
+    replacement   = "debug"
+  }
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    regex         = "informational|notice"
+    target_label  = "level"
+    replacement   = "info"
+  }
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    regex         = "warning"
+    target_label  = "level"
+    replacement   = "warn"
+  }
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    regex         = "error"
+    target_label  = "level"
+    replacement   = "error"
+  }
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    regex         = "critical|alert|emergency"
+    target_label  = "level"
+    replacement   = "critical"
+  }
+}
+
+// Drop known-routine/noisy messages here before they're stored in Loki.
+// Each stage.drop below matches on the raw message text. Add your own
+// stage.drop blocks for whatever turns out to be noise on your system;
+// these two are just examples from Tessera's own routine autosave chatter.
+loki.process "tessera" {
+  stage.drop {
+    expression          = "(?i)commencing auto save operation"
+    drop_counter_reason = "tessera_routine_autosave"
+  }
+
+  stage.drop {
+    expression          = "(?i)auto save operation succeeded"
+    drop_counter_reason = "tessera_routine_autosave"
+  }
+
+
+  // The four labels above are promoted only so the raw branch can read them.
+  // Strip them here so this stream's label set (and stream count) is unchanged.
+  stage.label_drop {
+    values = ["syslog_severity", "syslog_hostname", "syslog_app_name", "syslog_proc_id"]
+  }
+
+  forward_to = [loki.write.tessera.receiver]
+}
+
+
+// ─────────────────────── Verbatim archive branch ───────────────────────
+// A second branch off the same listener, for handing a complete, unedited
+// log to the manufacturer. It skips both lossy steps the dashboard stream
+// applies: nothing is dropped as noise, and severity is not rewritten.
+//
+// Lives under job="tessera_syslog_raw", so the dashboard (which selects
+// job="tessera_syslog") is unaffected.
+//
+// Stream labels are kept deliberately narrow -- job, connection_ip_address,
+// message_facility and the original syslog_severity -- to bound stream count.
+// Per-message fields go to structured metadata instead, which does NOT create
+// streams. That matters most for proc_id, which changes on every restart.
+//
+// Note this is the parsed message, not the original wire bytes: Alloy's syslog
+// listener consumes the RFC3164 frame and hands on the fields. Every field it
+// parsed is preserved here.
+loki.process "tessera_raw" {
+  stage.structured_metadata {
+    values = {
+      syslog_hostname = "syslog_hostname",
+      syslog_app_name = "syslog_app_name",
+      syslog_proc_id  = "syslog_proc_id",
+    }
+  }
+
+  stage.static_labels {
+    values = { job = "tessera_syslog_raw" }
+  }
+
+  // Drop the Grafana-vocabulary rewrite and the fields now carried as
+  // structured metadata. syslog_severity stays, untranslated.
+  stage.label_drop {
+    values = ["level", "syslog_hostname", "syslog_app_name", "syslog_proc_id"]
+  }
+
+  forward_to = [loki.write.tessera.receiver]
+}
+
+loki.write "tessera" {
+  endpoint {
+    url = "http://tessera-exporter-syslog-loki:3100/loki/api/v1/push"
+  }
+}

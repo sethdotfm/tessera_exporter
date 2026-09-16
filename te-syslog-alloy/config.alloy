@@ -1,13 +1,17 @@
-// tessera_exporter te-syslog-alloy/config-native.alloy // Version 1.1.1
+// tessera_exporter te-syslog-alloy/config.alloy // Version 1.1.1
 // https://github.com/sethdotfm/tessera_exporter
 //
-// Alloy runs NATIVELY on the host, not in Docker. Docker Desktop rewrites the
-// source IP of UDP traffic arriving on a published port, so every log line
-// would look like it came from the same address and the dashboard's
-// per-processor filtering would not work. See the README for install steps.
+// The default config. It listens on :514 and pushes to Loki's published host
+// port, which suits both ways this is actually run:
 //
-// Listens on :514 directly and pushes to Loki on its published host port
-// (127.0.0.1:3101), rather than over compose DNS.
+//   - the docker-compose 'tessera-exporter-syslog-alloy' service, which uses
+//     network_mode: host (Linux). The container shares the host's network, so
+//     there is no port remap and no compose DNS -- 127.0.0.1 IS the host.
+//   - a native install on macOS/Windows, where Docker Desktop's proxy rewrites
+//     the UDP source IP and Alloy has to run outside Docker. See the README.
+//
+// For running several instances on one host, each on its own reception port,
+// see te-syslog-alloy/config-bridge.alloy.
 
 loki.source.syslog "tessera" {
   listener {
