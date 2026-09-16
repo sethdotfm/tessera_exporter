@@ -125,8 +125,8 @@ When running on macOS/Windows, simply run Alloy natively on the host instead. Th
 # Install Alloy with homebrew:
 brew install grafana-alloy
 
-# Install the tessera_exporter config (backing up any existing one first)
-[ -f /opt/homebrew/etc/grafana-alloy/config.alloy ] && cp /opt/homebrew/etc/grafana-alloy/config.alloy /opt/homebrew/etc/grafana-alloy/config.alloy.old
+# Install the tessera_exporter config
+mkdir -p /opt/homebrew/etc/grafana-alloy
 cp te-syslog-alloy/config-native.alloy /opt/homebrew/etc/grafana-alloy/config.alloy
 
 # To bring up the service
@@ -138,6 +138,18 @@ sudo brew services stop grafana-alloy
 # To RESTART after editing the config, go through launchd directly:
 sudo launchctl kickstart -k system/homebrew.mxcl.grafana-alloy
 ```
+
+**The config directory may not exist after `brew install`** — hence the `mkdir -p`.
+The formula calls `pkgetc.mkpath`, but Homebrew does not link empty directories into
+the prefix and no default config is shipped to populate it, so a fresh machine has
+nothing there and `cp` fails outright.
+
+**Homebrew points Alloy at that whole directory, not at a single file.** The service
+runs `alloy run /opt/homebrew/etc/grafana-alloy`, and Alloy combines every `*.alloy`
+file in it into one unit. The filename is therefore arbitrary, and a second `*.alloy`
+file left in the directory is merged rather than ignored — two configs both declaring
+`loki.source.syslog "tessera"` is a duplicate component name, and Alloy exits instead
+of starting. Keep any old copy under an extension that isn't `.alloy`, or move it out.
 
 `brew services restart` is unreliable here. Started with `sudo`, Alloy is a root-owned system daemon in `/Library/LaunchDaemons`, so `brew services` run as your own user reports `Running: false` and may not restart anything. Confirm a restart actually happened by checking that the PID changed:
 
