@@ -10,6 +10,11 @@ full documentation live on `main`; the container image is pulled from
 
 Tested against Tessera SX40 processors running firmware **3.5.2**.
 
+Written for **Docker Desktop on macOS and Windows**, which is where most of these
+stacks end up. Everything runs in Docker except the optional syslog receiver, which
+Docker Desktop cannot host correctly — see [Syslog](#syslog-optional). On Linux the
+whole thing runs in Docker; the differences are called out where they matter.
+
 ---
 
 ## Get running
@@ -35,12 +40,16 @@ enabled for the loaded project. Without it `/probe` returns `tessera_up 0` with
 docker compose up -d
 ```
 
+Docker Desktop needs to be running first. If port `3000` or `9090` is already taken,
+change the left-hand side of the mapping in `docker-compose.yml` — the right-hand side
+is inside the container and should stay as it is.
+
 | Service | URL | Notes |
 | --- | --- | --- |
 | Grafana | http://localhost:3000 | Dashboards under the Tessera folder |
 | Prometheus | http://localhost:9090 | Check Status → Targets if a processor looks missing |
 | Exporter | http://localhost:19800/probe?target=192.0.2.50&debug=1 | Human-readable single scrape |
-| Loki | http://localhost:3101 | Syslog storage, only used if you set up Alloy below |
+| Loki | http://localhost:3101 | Syslog storage, only used once you install Alloy natively |
 
 Grafana installs the `marcusolsson-dynamictext-panel` plugin on first boot; the
 Overview and Detail dashboards need it, so give it a few seconds on a cold start.
@@ -64,24 +73,27 @@ keeps its row and shows as OFFLINE instead of silently disappearing. **If you ed
 
 ## Syslog (optional)
 
-Tessera processors send their operational log over UDP syslog. Both the receiver
-(Alloy) and storage (Loki) are in this compose stack. Point your processors' syslog
-target at this host, port `514`.
+Tessera processors send their operational log over UDP syslog. Point your processors'
+syslog target at this machine, port `514`.
 
-**On Linux this works as shipped.** Alloy runs with `network_mode: host`, sharing the
-host's network stack so it sees each processor's real source address — which is what
-the dashboard's per-processor filtering depends on. That also means it binds `:514`
-itself rather than taking a published port, so the container runs as `root`. This is
-the configuration the project is deployed with.
+Storage (Loki) runs in the compose stack. **The receiver, Alloy, has to run natively on
+macOS and Windows** — it is commented out of `docker-compose.yml` for that reason.
+Docker Desktop runs containers inside a VM that never sees the processors' real source
+addresses, so every log line would arrive looking identical and the per-processor
+filtering the dashboards are built around would be useless. `network_mode: host` does
+not rescue you there either; it is a Linux feature that Docker Desktop cannot emulate.
 
-**On macOS or Windows, comment the `tessera-exporter-syslog-alloy` service out and
-install Alloy natively instead.** Docker Desktop runs containers in a VM whose proxy
-rewrites the UDP source IP, so every log line would arrive from the same address —
-and `network_mode: host` does not get you the host's real interface there either. The
-rest of the stack can stay in Docker.
+Everything else — exporter, Prometheus, Loki, Grafana — stays in Docker. Alloy is the
+one piece that moves onto the host.
+
+> **On Linux?** Uncomment the `tessera-exporter-syslog-alloy` service in
+> `docker-compose.yml` and skip this entire section. It uses the same `config.alloy`,
+> runs with `network_mode: host`, and needs no native install.
+
+### macOS
 
 ```bash
-# macOS, from this directory:
+# from this directory:
 brew install grafana-alloy
 
 # Install the tessera_exporter config
@@ -122,28 +134,43 @@ reports `Running: false` and may not restart anything. Confirm the PID changed:
 pgrep -f '/opt/homebrew/opt/grafana-alloy/bin/alloy'
 ```
 
-`te-syslog-alloy/config.alloy` is the same file the Docker service uses — it already
-listens on `:514` and pushes to Loki's published port (`127.0.0.1:3101`), correct both
-under host networking and for a native install.
+### Windows
 
-### Several instances on one host
+Install Alloy with [winget or the graphical installer](https://grafana.com/docs/alloy/latest/set-up/install/windows/)
+(`alloy-installer-windows-amd64.exe` from the GitHub releases page). It installs to
+`%PROGRAMFILES%\GrafanaLabs\Alloy` and registers itself as a Windows service set to
+start automatically.
 
-To take syslog on more than one reception port, use `te-syslog-alloy/config-bridge.alloy`
-instead. It listens on `:1514` inside the container and reaches Loki over compose DNS,
-so the published port selects the reception port (`515:1514/udp`, and so on) and one
-config serves every instance. Give each its own storage volume and its own
-`--server.http.listen-addr`.
+Copy this repo's config over the one the installer drops in:
 
-This is **Linux only** — see the Docker Desktop note above — and less proven than the
-default. Source addresses survive because external packets reach the container through
-iptables DNAT, which rewrites only the destination; that is documented behaviour rather
-than something measured here, so check `connection_ip_address` in Loki before relying on
-per-processor filtering.
+```
+copy te-syslog-alloy\config.alloy "%PROGRAMFILES%\GrafanaLabs\Alloy\config.alloy"
+```
 
-Do **not** set `"userland-proxy": false` in `daemon.json` if source IPs look wrong. With
-it disabled the daemon can bind the published UDP port and swallow the traffic, and
-long-lived UDP streams like syslog are the documented casualty
-([moby/libnetwork#2423](https://github.com/moby/libnetwork/issues/2423), still open).
+Then restart the service — `services.msc`, right-click **Alloy**, *All Tasks → Restart*.
+Do that after every config edit; Alloy reads the file only at startup.
+
+Unlike the macOS install, the service is pointed at that one file rather than a
+directory, so a stray second `.alloy` file next to it is ignored. Command-line
+arguments live in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\GrafanaLabs\Alloy`
+if you need to change them.
+
+Untested against a Tessera rig — the macOS path above is the one in regular use. The
+config file itself is identical, so only the install and restart mechanics differ.
+
+### Either way
+
+`te-syslog-alloy/config.alloy` is the same file the Docker service uses. It listens on
+`:514` and pushes to Loki's published port (`127.0.0.1:3101`), which is correct for a
+native install and under `network_mode: host` alike — there is no separate config to
+keep in sync.
+
+Make sure nothing else on the machine already has UDP `514`, and that your firewall
+allows it inbound. On Windows the installer does not open the port for you.
+
+Running several receivers on one host, each on its own port, is a Linux-only
+arrangement using `te-syslog-alloy/config-bridge.alloy`; see the
+[main branch README](https://github.com/sethdotfm/tessera_exporter#readme).
 
 Severity is normalized into a `level` label (RFC5424's `informational`/`notice`/`warning`
 mapped to Grafana's `debug`/`info`/`warn`/`error`/`critical`) so the Logs panel's level

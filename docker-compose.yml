@@ -14,32 +14,38 @@ services:
 
 # ▼▼▼ ADD THESE OPTIONAL LINES TO ENABLE THE SYSLOG MONITOR ▼▼▼
 #
-#     ON macOS OR WINDOWS: comment out the 'tessera-exporter-syslog-alloy'
-#     service below and run Alloy natively on the host instead. Docker Desktop
-#     rewrites the source IP of UDP traffic, so every log line would look like
-#     it came from the same address and the dashboard's per-processor filtering
-#     would not work. See the README.
+#     Loki (log storage) runs here in Docker. The receiver, Alloy, does NOT:
+#     on macOS and Windows it has to run natively on the host. Docker Desktop
+#     runs containers inside a VM that never sees the processors' real source
+#     addresses, so every log line would arrive looking identical and the
+#     dashboard's per-processor filtering would be useless. network_mode: host
+#     does not help you there either.
 #
-  tessera-exporter-syslog-alloy:
-    container_name: 'tessera-exporter-syslog-alloy'
-    image: grafana/alloy:latest
-    # Shares the host's network stack, so Alloy sees each processor's real
-    # source address. Published ports are not available under host networking,
-    # which is why the config listens on :514 directly and why root is needed
-    # to bind it. The HTTP server below binds host :12345.
-    network_mode: host
-    user: root
-    volumes:
-      - ./te-syslog-alloy/config.alloy:/etc/alloy/config.alloy:ro
-      - te-syslog-alloy-data:/var/lib/alloy/data
-    command:
-      - "run"
-      - "--server.http.listen-addr=0.0.0.0:12345"
-      - "--storage.path=/var/lib/alloy/data"
-      - "/etc/alloy/config.alloy"
-    restart: unless-stopped
-    depends_on:
-      - tessera-exporter-syslog-loki
+#     Install Alloy natively with te-syslog-alloy/config.alloy -- see the README.
+#
+#     ON LINUX: uncomment the service below instead and skip the native install.
+#     It is the same config file either way.
+#
+#  tessera-exporter-syslog-alloy:
+#    container_name: 'tessera-exporter-syslog-alloy'
+#    image: grafana/alloy:latest
+#    # Shares the host's network stack, so Alloy sees each processor's real
+#    # source address. Published ports are not available under host networking,
+#    # which is why the config listens on :514 directly and why root is needed
+#    # to bind it. The HTTP server below binds host :12345.
+#    network_mode: host
+#    user: root
+#    volumes:
+#      - ./te-syslog-alloy/config.alloy:/etc/alloy/config.alloy:ro
+#      - te-syslog-alloy-data:/var/lib/alloy/data
+#    command:
+#      - "run"
+#      - "--server.http.listen-addr=0.0.0.0:12345"
+#      - "--storage.path=/var/lib/alloy/data"
+#      - "/etc/alloy/config.alloy"
+#    restart: unless-stopped
+#    depends_on:
+#      - tessera-exporter-syslog-loki
 
   tessera-exporter-syslog-loki:
     container_name: 'tessera-exporter-syslog-loki'
