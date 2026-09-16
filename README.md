@@ -95,8 +95,10 @@ service runs `alloy run /opt/homebrew/etc/grafana-alloy`, and Alloy combines
 - If you want to keep an old config alongside it, give it an extension that isn't
   `.alloy` (`config.alloy.old` is fine) or move it out of the directory entirely.
 
-Homebrew creates the directory empty — it ships no default config — so on a fresh
-install there is nothing to back up and nothing to conflict with.
+**The directory may not exist after `brew install`** — hence the `mkdir -p`. The
+formula creates it, but Homebrew does not link empty directories into the prefix,
+and there is no default config shipped to populate it. On a fresh machine you get
+no directory, and `cp` fails with "No such file or directory".
 
 To **restart** after editing the config, go through launchd directly:
 
